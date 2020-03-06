@@ -19,7 +19,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "postversion": "cp package.json README.md dist/",
-    "generate-barrels": "barrelsby --config barrelsby.json"
+    "generate-barrels": "barrelsby --config barrelsby.json",
+    "release": "npx np --no-publish --contents dist/"
   },
   "dependencies": {
     "graphql-relay": "^0.6.0",
