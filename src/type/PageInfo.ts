@@ -3,16 +3,16 @@ import * as GQL from 'type-graphql';
 
 @GQL.ObjectType()
 export class PageInfo implements Relay.PageInfo {
-  @GQL.Field()
+  @GQL.Field(_type => Boolean)
   public hasNextPage!: boolean;
 
-  @GQL.Field()
+  @GQL.Field(_type => Boolean)
   public hasPreviousPage!: boolean;
 
-  @GQL.Field({ nullable: true })
+  @GQL.Field(_type => String, { nullable: true })
   public startCursor?: string | null;
 
-  @GQL.Field({ nullable: true })
+  @GQL.Field(_type => String, { nullable: true })
   public endCursor?: string | null;
 
   @GQL.Field(_type => GQL.Int, { nullable: true })

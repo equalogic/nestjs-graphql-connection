@@ -2,13 +2,13 @@ import * as GQL from 'type-graphql';
 
 @GQL.ArgsType()
 export class ConnectionArgs {
-  @GQL.Field({
+  @GQL.Field(_type => String, {
     nullable: true,
     description: 'Retrieve page of edges before opaque cursor.',
   })
   public before?: string;
 
-  @GQL.Field({
+  @GQL.Field(_type => String, {
     nullable: true,
     description: 'Retrieve page of edges after opaque cursor.',
   })
