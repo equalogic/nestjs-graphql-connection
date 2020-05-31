@@ -1,4 +1,4 @@
-import * as GQL from 'type-graphql';
+import * as GQL from '@nestjs/graphql';
 
 @GQL.ArgsType()
 export class ConnectionArgs {

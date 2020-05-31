@@ -1,5 +1,5 @@
 import * as Relay from 'graphql-relay';
-import * as GQL from 'type-graphql';
+import * as GQL from '@nestjs/graphql';
 
 @GQL.ObjectType()
 export class PageInfo implements Relay.PageInfo {
