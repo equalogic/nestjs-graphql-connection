@@ -1,0 +1,7 @@
+{
+  "contents": "dist",
+  "publish": false,
+  "yarn": false,
+  "cleanup": false,
+  "tests": false
+}
