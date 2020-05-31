@@ -1,4 +1,4 @@
-import * as GQL from 'type-graphql';
+import * as GQL from '@nestjs/graphql';
 import * as Relay from 'graphql-relay';
 import { EdgeInterface } from './Edge';
 import { PageInfo } from './PageInfo';

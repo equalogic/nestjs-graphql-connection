@@ -1,5 +1,5 @@
 import * as Relay from 'graphql-relay';
-import * as GQL from 'type-graphql';
+import * as GQL from '@nestjs/graphql';
 
 export interface EdgeInterface<TNode> extends Relay.Edge<TNode> {
   node: TNode;
