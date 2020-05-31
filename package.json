@@ -12,14 +12,15 @@
     "url": "https://github.com/madscience/graphql-pagination.git"
   },
   "scripts": {
-    "prebuild": "rimraf dist",
+    "prebuild": "rimraf dist && npm run barrels:generate",
     "build": "tsc -p tsconfig.build.json",
+    "postbuild": "cp package.json README.md dist/",
     "lint": "eslint --ext .ts --ignore-path .gitignore .",
     "lint:fix": "eslint --ext .ts --ignore-path .gitignore . --fix",
     "test": "jest",
     "test:watch": "jest --watch",
-    "postversion": "cp package.json README.md dist/",
-    "generate-barrels": "barrelsby --config barrelsby.json",
+    "postversion": "npm run postbuild",
+    "barrels:generate": "barrelsby --config barrelsby.json",
     "release": "npx np --no-publish --contents dist/"
   },
   "dependencies": {
