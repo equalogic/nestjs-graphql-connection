@@ -1,6 +1,6 @@
 {
   "name": "@madsci/graphql-pagination",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Relay-style pagination for GraphQL using Connections, Edges and Cursors.",
   "author": "Madscience Ltd",
   "license": "UNLICENSED",
