@@ -26,15 +26,6 @@ module.exports = {
         requireForBlockBody: false,
       },
     ],
-    'object-curly-newline': [
-      'error',
-      {
-        ObjectExpression: { minProperties: 2, consistent: true },
-        ObjectPattern: { minProperties: 5, consistent: true },
-        ImportDeclaration: { consistent: true },
-        ExportDeclaration: { consistent: true },
-      },
-    ],
     'no-multiple-empty-lines': [
       'error',
       {
