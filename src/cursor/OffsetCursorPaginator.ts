@@ -67,7 +67,7 @@ export class OffsetCursorPaginator {
   }
 
   public static createFromConnectionArgs(
-    { first, last, before, after }: ConnectionArgs,
+    { page, first, last, before, after }: ConnectionArgs,
     totalEdges: number,
     options: CreateFromConnectionArgsOptions = {},
   ): OffsetCursorPaginator {
@@ -84,6 +84,22 @@ export class OffsetCursorPaginator {
 
       take = first;
       skip = 0;
+    }
+
+    if (page != null) {
+      if (last != null || after != null || before != null) {
+        throw new ConnectionArgsValidationError(
+          `The "page" argument cannot be used together with "last", "after" or "before".`,
+        );
+      }
+
+      if (page < 1) {
+        throw new ConnectionArgsValidationError(
+          `The "page" argument accepts only a positive integer greater than zero.`,
+        );
+      }
+
+      skip = take * (page - 1);
     }
 
     if (last != null) {
