@@ -14,6 +14,9 @@ tmp
 # When npm runs error it write logs to the below file
 npm-debug.log
 
+# ESLint cache file
+.eslintcache
+
 # IDE
 .idea
 
