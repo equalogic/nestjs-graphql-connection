@@ -49,6 +49,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "husky": "^4.2.5",
     "jest": "^25.1.0",
+    "lint-staged": "^10.2.7",
     "np": "^6.2.3",
     "reflect-metadata": "^0.1.13",
     "ts-jest": "^25.2.1",
@@ -64,7 +65,10 @@
   "types": "index.d.ts",
   "husky": {
     "hooks": {
-      "pre-commit": "npm run barrels:generate && git add -A src/**/index.ts"
+      "pre-commit": "npm run barrels:generate && git add -A src/**/index.ts && lint-staged"
     }
+  },
+  "lint-staged": {
+    "*.{ts,js}": "eslint --cache --fix"
   }
 }
