@@ -3,5 +3,4 @@
  */
 
 export * from './Cursor';
-export * from './OffsetCursorPaginator.spec';
 export * from './OffsetCursorPaginator';
