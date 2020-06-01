@@ -51,4 +51,23 @@ describe('OffsetCursorPaginator', () => {
     expect(pageInfo.endCursor).toBeDefined();
     expect(OffsetCursor.create(pageInfo.endCursor!).parameters.offset).toStrictEqual(49);
   });
+
+  test('PageInfo is correct for fixed offset pagination', () => {
+    const paginator = OffsetCursorPaginator.createFromConnectionArgs(
+      {
+        first: 20,
+        page: 4,
+      },
+      100,
+    );
+    const pageInfo = paginator.createPageInfo(20);
+
+    expect(pageInfo.totalEdges).toBe(100);
+    expect(pageInfo.hasPreviousPage).toBe(true);
+    expect(pageInfo.hasNextPage).toBe(true);
+    expect(pageInfo.startCursor).toBeDefined();
+    expect(OffsetCursor.create(pageInfo.startCursor!).parameters.offset).toStrictEqual(60);
+    expect(pageInfo.endCursor).toBeDefined();
+    expect(OffsetCursor.create(pageInfo.endCursor!).parameters.offset).toStrictEqual(79);
+  });
 });
