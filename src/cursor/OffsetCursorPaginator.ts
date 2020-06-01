@@ -36,6 +36,11 @@ export class OffsetCursor extends Cursor {
   }
 }
 
+interface CreateFromConnectionArgsOptions {
+  defaultEdgesPerPage?: number;
+  maxEdgesPerPage?: number;
+}
+
 export class OffsetCursorPaginator {
   public take: number = 20;
   public skip: number = 0;
@@ -62,19 +67,39 @@ export class OffsetCursorPaginator {
   }
 
   public static createFromConnectionArgs(
-    { first, last, before, after }: ConnectionArgs,
+    { page, first, last, before, after }: ConnectionArgs,
     totalEdges: number,
+    options: CreateFromConnectionArgsOptions = {},
   ): OffsetCursorPaginator {
-    let take: number = 20;
+    const { defaultEdgesPerPage = 20, maxEdgesPerPage = 100 } = options;
+    let take: number = defaultEdgesPerPage;
     let skip: number = 0;
 
     if (first != null) {
-      if (first > 100 || first < 1) {
-        throw new ConnectionArgsValidationError('The "first" argument accepts a value between 1 and 100, inclusive.');
+      if (first > maxEdgesPerPage || first < 1) {
+        throw new ConnectionArgsValidationError(
+          `The "first" argument accepts a value between 1 and ${maxEdgesPerPage}, inclusive.`,
+        );
       }
 
       take = first;
       skip = 0;
+    }
+
+    if (page != null) {
+      if (last != null || after != null || before != null) {
+        throw new ConnectionArgsValidationError(
+          `The "page" argument cannot be used together with "last", "after" or "before".`,
+        );
+      }
+
+      if (page < 1) {
+        throw new ConnectionArgsValidationError(
+          `The "page" argument accepts only a positive integer greater than zero.`,
+        );
+      }
+
+      skip = take * (page - 1);
     }
 
     if (last != null) {
@@ -85,7 +110,9 @@ export class OffsetCursorPaginator {
       }
 
       if (last > 100 || last < 1) {
-        throw new ConnectionArgsValidationError('The "last" argument accepts a value between 1 and 100, inclusive.');
+        throw new ConnectionArgsValidationError(
+          `The "last" argument accepts a value between 1 and ${maxEdgesPerPage}, inclusive.`,
+        );
       }
 
       take = last;
