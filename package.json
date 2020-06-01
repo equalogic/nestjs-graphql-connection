@@ -64,7 +64,7 @@
   "types": "index.d.ts",
   "husky": {
     "hooks": {
-      "pre-commit": "npm run barrels:generate"
+      "pre-commit": "npm run barrels:generate && git add -A src/**/index.ts"
     }
   }
 }
