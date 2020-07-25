@@ -1,0 +1,35 @@
+{
+  "extends": [
+    "config:js-lib",
+    ":automergeMajor",
+    ":automergePr",
+    ":automergeRequireAllStatusChecks",
+    ":dependencyDashboard",
+    ":semanticCommitsDisabled"
+  ],
+  "prHourlyLimit": 4,
+  "prConcurrentLimit": 10,
+  "prCreation": "not-pending",
+  "stabilityDays": 3,
+  "rebaseWhen": "conflicted",
+  "labels": [
+    "dependencies"
+  ],
+  "reviewers": [
+    "sgarner"
+  ],
+  "packageRules": [
+    {
+      "packagePatterns": [
+        "eslint"
+      ],
+      "groupName": "eslint"
+    },
+    {
+      "packagePatterns": [
+        "jest"
+      ],
+      "groupName": "jest"
+    }
+  ]
+}
