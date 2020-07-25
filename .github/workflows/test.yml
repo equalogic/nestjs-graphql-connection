@@ -1,0 +1,127 @@
+name: Test
+
+on: [push]
+
+jobs:
+  #
+  # dependencies job
+  #
+  dependencies:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+          always-auth: true
+          registry-url: https://registry.npmjs.org
+      - id: cache_npm
+        name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.npm
+            ./node_modules.tar.zstd
+          key: ${{ runner.OS }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-npm-
+            ${{ runner.OS }}-
+      - name: Install dependencies with NPM
+        if: steps.cache_npm.outputs.cache-hit != 'true'
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      - name: Archive node_modules
+        if: steps.cache_npm.outputs.cache-hit != 'true'
+        run: tar --use-compress-program "zstd -T0 --long=31 -1" -cf node_modules.tar.zstd -P node_modules
+      - name: Persisting node_modules artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: node_modules.tar.zstd
+          path: node_modules.tar.zstd
+
+  #
+  # lint job
+  #
+  lint:
+    runs-on: ubuntu-latest
+    needs: [dependencies]
+
+    steps:
+      # Setup
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+          always-auth: true
+          registry-url: https://registry.npmjs.org
+      - name: Restore node_modules artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: node_modules.tar.zstd
+      - name: Unarchive node_modules
+        run: tar --use-compress-program "zstd -d --long=31" -xf node_modules.tar.zstd
+      # ESLint
+      - name: Lint source code
+        run: npm run lint
+
+  #
+  # build job
+  #
+  build:
+    runs-on: ubuntu-latest
+    needs: [dependencies]
+
+    steps:
+      # Setup
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+          always-auth: true
+          registry-url: https://registry.npmjs.org
+      - name: Restore node_modules artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: node_modules.tar.zstd
+      - name: Unarchive node_modules
+        run: tar --use-compress-program "zstd -d --long=31" -xf node_modules.tar.zstd
+      # Build
+      - name: Build application
+        run: npm run build
+        env:
+          CI: true
+      - name: Check build worked correctly
+        run: |
+          if [ ! -f ./dist/index.js ]; then
+            echo "Something went wrong: no ./dist/index.js file was built!"
+            exit 1
+          else
+            echo "Build appears to be successful: ./dist/index.js was created"
+          fi
+
+  #
+  # test job
+  #
+  test:
+    runs-on: ubuntu-latest
+    needs: [dependencies]
+
+    steps:
+      # Setup
+      - uses: actions/checkout@v2
+      - name: Restore node_modules artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: node_modules.tar.zstd
+      - name: Unarchive node_modules
+        run: tar --use-compress-program "zstd -d --long=31" -xf node_modules.tar.zstd
+      # Tests
+      - name: Run project tests
+        run: npm run test
+        env:
+          CI: true
