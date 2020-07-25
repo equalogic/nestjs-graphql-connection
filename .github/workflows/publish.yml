@@ -1,0 +1,58 @@
+name: Publish
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  #
+  # npm job
+  #
+  npm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+          always-auth: true
+          registry-url: https://registry.npmjs.org
+      # Dependencies
+      - id: cache_npm
+        name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.npm
+            ./node_modules.tar.zstd
+          key: ${{ runner.OS }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-npm-
+            ${{ runner.OS }}-
+      - name: Install dependencies with NPM
+        if: steps.cache_npm.outputs.cache-hit != 'true'
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      # Build
+      - name: Build application
+        run: npm run build
+        env:
+          CI: true
+      - name: Check build worked correctly
+        run: |
+          if [ ! -f ./dist/index.js ]; then
+            echo "Something went wrong: no ./dist/index.js file was built!"
+            exit 1
+          else
+            echo "Build appears to be successful: ./dist/index.js was created"
+          fi
+      # Publish
+      - name: Copy extra files into dist directory
+        run: cp package.json README* dist/
+      - name: Publish release to NPM registry
+        run: npm publish dist
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
