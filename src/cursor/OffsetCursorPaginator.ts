@@ -12,16 +12,14 @@ export class OffsetCursor extends Cursor {
     const parameters = Cursor.decode(encodedString);
 
     // validate the cursor parameters match the schema we expect, this also converts data types
-    const { error, value: validatedParameters } = Joi.validate(
-      parameters,
-      Joi.object({
-        offset: Joi.number()
-          .integer()
-          .min(0)
-          .empty('')
-          .required(),
-      }).unknown(false),
-    );
+    const schema = Joi.object({
+      offset: Joi.number()
+        .integer()
+        .min(0)
+        .empty('')
+        .required(),
+    }).unknown(false);
+    const { error, value: validatedParameters } = schema.validate(parameters);
 
     if (error != null) {
       const errorMessages =
