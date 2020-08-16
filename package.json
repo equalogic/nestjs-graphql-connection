@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "graphql-relay": "^0.6.0",
-    "joi": "^17.0.0"
+    "joi": "^17.2.0"
   },
   "devDependencies": {
     "@nestjs/common": "7.4.2",
