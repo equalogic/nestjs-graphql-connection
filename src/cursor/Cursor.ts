@@ -32,7 +32,7 @@ export class Cursor {
     });
 
     // validate the cursor parameters match the schema we expect, this also converts data types
-    const { error, value: validatedParameters } = Joi.validate(parameters, schema);
+    const { error, value: validatedParameters } = schema.validate(parameters);
 
     if (error != null) {
       throw error;
