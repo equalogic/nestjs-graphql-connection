@@ -1,0 +1,18 @@
+name: Cleanup
+
+on:
+  schedule:
+    - cron: '0 1 * * *' # every day at 1am
+
+jobs:
+  remove-old-artifacts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Remove old artifacts
+        uses: c-hive/gha-remove-artifacts@v1
+        with:
+          age: '7 days'    # delete artifacts older than this
+          skip-tags: true  # keep artifacts created by runs on tagged commits
+          skip-recent: 5   # keep the last 5 runs, regardless of age
