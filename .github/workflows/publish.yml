@@ -36,6 +36,9 @@ jobs:
         run: npm ci
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      - name: Unarchive node_modules
+        if: steps.cache_npm.outputs.cache-hit == 'true'
+        run: tar --use-compress-program "zstd -d --long=31" -xf node_modules.tar.zstd
       # Build
       - name: Build application
         run: npm run build
