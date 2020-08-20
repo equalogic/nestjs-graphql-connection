@@ -33,7 +33,7 @@
     "@nestjs/graphql": "7.6.0",
     "@types/graphql-relay": "0.6.0",
     "@types/jest": "26.0.10",
-    "@types/node": "14.0.27",
+    "@types/node": "14.6.0",
     "@typescript-eslint/eslint-plugin": "3.9.0",
     "@typescript-eslint/parser": "3.9.0",
     "barrelsby": "2.2.0",
