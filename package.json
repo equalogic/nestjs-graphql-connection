@@ -47,7 +47,7 @@
     "eslint-plugin-standard": "4.0.1",
     "husky": "4.2.5",
     "jest": "26.4.2",
-    "lint-staged": "10.2.11",
+    "lint-staged": "10.2.13",
     "np": "6.4.0",
     "reflect-metadata": "0.1.13",
     "ts-jest": "26.2.0",
