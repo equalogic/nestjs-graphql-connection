@@ -28,8 +28,8 @@
     "joi": "^17.2.0"
   },
   "devDependencies": {
-    "@nestjs/common": "7.5.5",
-    "@nestjs/core": "7.5.5",
+    "@nestjs/common": "7.6.1",
+    "@nestjs/core": "7.6.1",
     "@nestjs/graphql": "7.9.1",
     "@types/graphql-relay": "0.6.0",
     "@types/jest": "26.0.16",
