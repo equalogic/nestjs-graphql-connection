@@ -30,7 +30,7 @@
   "devDependencies": {
     "@nestjs/common": "7.6.5",
     "@nestjs/core": "7.6.5",
-    "@nestjs/graphql": "7.9.5",
+    "@nestjs/graphql": "7.9.8",
     "@types/graphql-relay": "0.6.0",
     "@types/jest": "26.0.20",
     "@types/node": "14.14.22",
