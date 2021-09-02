@@ -31,7 +31,7 @@
   "devDependencies": {
     "@nestjs/common": "8.0.6",
     "@nestjs/core": "8.0.6",
-    "@nestjs/graphql": "7.11.0",
+    "@nestjs/graphql": "9.0.4",
     "@types/graphql-relay": "0.6.0",
     "@types/jest": "27.0.1",
     "@types/node": "14.17.12",
@@ -57,7 +57,7 @@
   "peerDependencies": {
     "@nestjs/common": "^7.1 || ^8.0.0",
     "@nestjs/core": "^7.1 || ^8.0.0",
-    "@nestjs/graphql": "^7.4",
+    "@nestjs/graphql": "^7.4 || ^9.0.0",
     "reflect-metadata": "^0.1.13"
   },
   "main": "index.js",
