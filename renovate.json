@@ -2,7 +2,7 @@
   "extends": [
     "config:js-lib",
     ":automergeMajor",
-    ":automergePr",
+    ":automergeBranch",
     ":automergeRequireAllStatusChecks",
     ":dependencyDashboard",
     ":semanticCommitsDisabled"
