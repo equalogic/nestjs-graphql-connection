@@ -12,6 +12,7 @@
   "prCreation": "not-pending",
   "stabilityDays": 3,
   "rebaseWhen": "conflicted",
+  "lockFileMaintenance": true,
   "labels": ["dependencies"],
   "reviewers": ["sgarner"],
   "packageRules": [
