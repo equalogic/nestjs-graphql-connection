@@ -12,23 +12,15 @@
   "prCreation": "not-pending",
   "stabilityDays": 3,
   "rebaseWhen": "conflicted",
-  "labels": [
-    "dependencies"
-  ],
-  "reviewers": [
-    "sgarner"
-  ],
+  "labels": ["dependencies"],
+  "reviewers": ["sgarner"],
   "packageRules": [
     {
-      "packagePatterns": [
-        "eslint"
-      ],
+      "packagePatterns": ["eslint"],
       "groupName": "eslint"
     },
     {
-      "packagePatterns": [
-        "jest"
-      ],
+      "packagePatterns": ["jest"],
       "groupName": "jest"
     }
   ]

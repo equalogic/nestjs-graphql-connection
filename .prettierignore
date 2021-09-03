@@ -1,0 +1,15 @@
+# Ignore workflows
+.github
+
+# Node modules
+node_modules
+
+# Ignore build files
+dist
+
+# Test results
+test/.results
+test/.coverage
+
+# IDE
+.idea

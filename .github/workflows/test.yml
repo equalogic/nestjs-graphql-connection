@@ -17,6 +17,7 @@ jobs:
           node-version: '12.x'
           always-auth: true
           registry-url: https://registry.npmjs.org
+      # Install node modules
       - id: cache_npm
         name: Cache Node.js modules
         uses: actions/cache@v2
@@ -41,6 +42,7 @@ jobs:
         with:
           name: node_modules.tar.zstd
           path: node_modules.tar.zstd
+          retention-days: 2
 
   #
   # lint job
@@ -52,6 +54,8 @@ jobs:
     steps:
       # Setup
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.MADSCI_BUILD_USER_TOKEN }} # allows commit of any fixes to trigger a new workflow run
       - name: Use Node.js 12.x
         uses: actions/setup-node@v2
         with:
@@ -64,9 +68,17 @@ jobs:
           name: node_modules.tar.zstd
       - name: Unarchive node_modules
         run: tar --use-compress-program "zstd -d --long=31" -xf node_modules.tar.zstd
-      # ESLint
-      - name: Lint source code
-        run: npm run lint
+      # Lint
+      - name: Run linters
+        uses: wearerequired/lint-action@v1
+        with:
+          prettier: true
+          eslint: true
+          eslint_args: "--ext '.ts,.js' --ignore-path '.gitignore' --ignore-pattern '.github/*'"
+          continue_on_error: false
+          auto_fix: true
+          git_name: Madbot
+          git_email: 64821814+madsci-bot@users.noreply.github.com
 
   #
   # build job

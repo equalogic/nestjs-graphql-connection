@@ -1,8 +1,6 @@
 {
   "directory": "src/",
-  "exclude": [
-    "\\.(spec|e2e-spec)\\.ts$"
-  ],
+  "exclude": ["\\.(spec|e2e-spec)\\.ts$"],
   "location": "all",
   "structure": "flat",
   "singleQuotes": true,
