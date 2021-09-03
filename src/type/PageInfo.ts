@@ -10,10 +10,10 @@ export class PageInfo implements Relay.PageInfo {
   public hasPreviousPage!: boolean;
 
   @GQL.Field(_type => String, { nullable: true })
-  public startCursor?: string | null;
+  public startCursor: string | null;
 
   @GQL.Field(_type => String, { nullable: true })
-  public endCursor?: string | null;
+  public endCursor: string | null;
 
   @GQL.Field(_type => GQL.Int, { nullable: true })
   public totalEdges?: number | null;
