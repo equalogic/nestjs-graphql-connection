@@ -10,7 +10,7 @@ export class ConnectionArgs {
     nullable: true,
     description: 'Retrieve page of edges by fixed offset page number.',
   })
-  public page?: number;
+  public page?: number | null;
 
   @Validate.IsString()
   @Validate.MinLength(1)
@@ -19,7 +19,7 @@ export class ConnectionArgs {
     nullable: true,
     description: 'Retrieve page of edges before opaque cursor.',
   })
-  public before?: string;
+  public before?: string | null;
 
   @Validate.IsString()
   @Validate.MinLength(1)
@@ -28,7 +28,7 @@ export class ConnectionArgs {
     nullable: true,
     description: 'Retrieve page of edges after opaque cursor.',
   })
-  public after?: string;
+  public after?: string | null;
 
   @Validate.IsInt()
   @Validate.Min(1)
@@ -37,7 +37,7 @@ export class ConnectionArgs {
     nullable: true,
     description: 'Retrieve first `n` edges.',
   })
-  public first?: number;
+  public first?: number | null;
 
   @Validate.IsInt()
   @Validate.Min(1)
@@ -46,5 +46,5 @@ export class ConnectionArgs {
     nullable: true,
     description: 'Retrieve last `n` edges.',
   })
-  public last?: number;
+  public last?: number | null;
 }
