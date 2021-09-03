@@ -8,13 +8,12 @@ module.exports = {
   },
   extends: [
     'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
     'prettier',
   ],
-  plugins: [
-    '@typescript-eslint',
-    'prettier',
-  ],
+  plugins: ['@typescript-eslint', 'import'],
   // add your custom rules here
   rules: {
     semi: ['error', 'always'],
