@@ -13,11 +13,7 @@ export class OffsetCursor extends Cursor {
 
     // validate the cursor parameters match the schema we expect, this also converts data types
     const schema = Joi.object({
-      offset: Joi.number()
-        .integer()
-        .min(0)
-        .empty('')
-        .required(),
+      offset: Joi.number().integer().min(0).empty('').required(),
     }).unknown(false);
     const { error, value: validatedParameters } = schema.validate(parameters);
 
