@@ -46,7 +46,7 @@
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "5.1.0",
     "husky": "7.0.2",
-    "jest": "27.1.0",
+    "jest": "27.1.1",
     "lint-staged": "11.1.2",
     "np": "7.5.0",
     "prettier": "2.3.2",
