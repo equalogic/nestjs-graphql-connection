@@ -46,12 +46,12 @@
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "5.2.0",
     "husky": "7.0.4",
-    "jest": "27.4.4",
+    "jest": "27.4.5",
     "lint-staged": "12.1.2",
     "np": "7.6.0",
     "prettier": "2.5.1",
     "reflect-metadata": "0.1.13",
-    "ts-jest": "27.1.1",
+    "ts-jest": "27.1.2",
     "typescript": "4.5.4"
   },
   "peerDependencies": {
