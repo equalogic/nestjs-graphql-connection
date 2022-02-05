@@ -46,9 +46,7 @@
     "eslint-plugin-import": "2.25.4",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "6.0.0",
-    "husky": "7.0.4",
     "jest": "27.4.7",
-    "lint-staged": "12.3.2",
     "np": "7.6.0",
     "prettier": "2.5.1",
     "reflect-metadata": "0.1.13",
@@ -62,13 +60,5 @@
     "reflect-metadata": "^0.1.13"
   },
   "main": "index.js",
-  "types": "index.d.ts",
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run barrels:generate && lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.{ts,js}": "eslint --cache --fix"
-  }
+  "types": "index.d.ts"
 }
