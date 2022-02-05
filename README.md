@@ -1,4 +1,4 @@
-# nestjs-graphql-connection
+# nestjs-graphql-connection 🐈‍ ⚛️ 🔗
 
 [Relay-style pagination](https://relay.dev/graphql/connections.htm) for NestJS GraphQL server.
 
