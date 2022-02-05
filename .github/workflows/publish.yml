@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Use Node.js 12.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: '12.x'
+          node-version: '16.x'
           always-auth: true
           registry-url: https://registry.npmjs.org
       # Dependencies
@@ -27,10 +27,9 @@ jobs:
           path: |
             ~/.npm
             ./node_modules.tar.zstd
-          key: ${{ runner.OS }}-npm-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.OS }}-node16.x-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.OS }}-npm-
-            ${{ runner.OS }}-
+            ${{ runner.OS }}-node16.x-
       - name: Install dependencies with NPM
         if: steps.cache_npm.outputs.cache-hit != 'true'
         run: npm ci

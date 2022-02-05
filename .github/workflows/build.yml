@@ -11,13 +11,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Use Node.js 12.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: '12.x'
+          node-version: '16.x'
           always-auth: true
           registry-url: https://registry.npmjs.org
-      # Install node modules
       - id: cache_npm
         name: Cache Node.js modules
         uses: actions/cache@v2
@@ -25,15 +24,12 @@ jobs:
           path: |
             ~/.npm
             ./node_modules.tar.zstd
-          key: ${{ runner.OS }}-npm-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.OS }}-node16.x-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.OS }}-npm-
-            ${{ runner.OS }}-
+            ${{ runner.OS }}-node16.x-
       - name: Install dependencies with NPM
         if: steps.cache_npm.outputs.cache-hit != 'true'
         run: npm ci
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
       - name: Archive node_modules
         if: steps.cache_npm.outputs.cache-hit != 'true'
         run: tar --use-compress-program "zstd -T0 --long=31 -1" -cf node_modules.tar.zstd -P node_modules
@@ -56,10 +52,10 @@ jobs:
       - uses: actions/checkout@v2
         with:
           token: ${{ secrets.MADSCI_BUILD_USER_TOKEN }} # allows commit of any fixes to trigger a new workflow run
-      - name: Use Node.js 12.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: '12.x'
+          node-version: '16.x'
           always-auth: true
           registry-url: https://registry.npmjs.org
       - name: Restore node_modules artifact
@@ -90,10 +86,10 @@ jobs:
     steps:
       # Setup
       - uses: actions/checkout@v2
-      - name: Use Node.js 12.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: '12.x'
+          node-version: '16.x'
           always-auth: true
           registry-url: https://registry.npmjs.org
       - name: Restore node_modules artifact
@@ -126,6 +122,12 @@ jobs:
     steps:
       # Setup
       - uses: actions/checkout@v2
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          always-auth: true
+          registry-url: https://registry.npmjs.org
       - name: Restore node_modules artifact
         uses: actions/download-artifact@v2
         with:
