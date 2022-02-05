@@ -53,6 +53,6 @@ jobs:
       - name: Copy extra files into dist directory
         run: cp package.json README* dist/
       - name: Publish release to NPM registry
-        run: npm publish dist
+        run: npm publish dist/
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
