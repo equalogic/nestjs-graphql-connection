@@ -63,10 +63,6 @@ export class PersonConnectionArgs extends ConnectionArgs {
 Your resolvers can return a `Connection` as an object type. Use a `Paginator` class to help you determine which page
 of results to fetch and to create `PageInfo` and cursors in the result.
 
-#### Using Cursor Pagination
-
-_WIP_
-
 #### Using Offset Pagination
 
 With offset pagination, cursor values are an encoded representation of the row offset. It is possible for clients to
@@ -111,3 +107,9 @@ export class PersonQueryResolver {
   }
 }
 ```
+
+#### Using Cursor Pagination
+
+🚧 **WIP** 🚧
+
+_Cursors are ready but there is no Paginator class implementation yet._
