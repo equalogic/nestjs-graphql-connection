@@ -1,3 +1,3 @@
-# graphql-pagination
+# nestjs-graphql-connection
 
-GraphQL Pagination
+Relay-style pagination for NestJS GraphQL server.

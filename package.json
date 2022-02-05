@@ -1,15 +1,15 @@
 {
-  "name": "@madsci/graphql-pagination",
+  "name": "nestjs-graphql-connection",
   "version": "0.4.0",
-  "description": "Relay-style pagination for GraphQL using Connections, Edges and Cursors.",
-  "author": "Madscience Ltd",
-  "license": "UNLICENSED",
+  "description": "Relay-style pagination for NestJS GraphQL server.",
+  "author": "Equalogic Ltd",
+  "license": "MIT",
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/madscience/graphql-pagination.git"
+    "url": "https://github.com/equalogic/nestjs-graphql-connection.git"
   },
   "scripts": {
     "prebuild": "rimraf dist && npm run barrels:generate",
