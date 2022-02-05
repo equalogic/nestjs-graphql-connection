@@ -3,11 +3,11 @@ import { ConnectionArgs, PageInfo } from '../type';
 import { Cursor } from './Cursor';
 import { ConnectionArgsValidationError, CursorValidationError } from '../error';
 
-export class OffsetCursor extends Cursor {
-  public parameters: {
-    offset: number;
-  };
+export type OffsetCursorParameters = {
+  offset: number;
+}
 
+export class OffsetCursor extends Cursor<OffsetCursorParameters> {
   public static create(encodedString: string): OffsetCursor {
     const parameters = Cursor.decode(encodedString);
 

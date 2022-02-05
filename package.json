@@ -27,7 +27,8 @@
   "dependencies": {
     "class-validator": "^0.13.1",
     "graphql-relay": "^0.10.0",
-    "joi": "^17.2.0"
+    "joi": "^17.2.0",
+    "query-string": "7.1.1"
   },
   "devDependencies": {
     "@nestjs/common": "8.2.6",

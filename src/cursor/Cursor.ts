@@ -1,35 +1,29 @@
-import * as querystring from 'querystring';
 import Joi from 'joi';
+import queryString, { StringifiableRecord } from 'query-string';
 
-export class Cursor {
-  constructor(public readonly parameters: querystring.ParsedUrlQueryInput) {}
+export type CursorParameters = StringifiableRecord;
+
+export class Cursor<P = CursorParameters> {
+  constructor(public readonly parameters: P) {}
 
   public toString(): string {
-    return querystring.stringify(this.parameters, '&', '=');
+    return queryString.stringify(this.parameters);
   }
 
   public encode(): string {
     return Buffer.from(this.toString()).toString('base64');
   }
 
-  public static decode(encodedString: string): querystring.ParsedUrlQuery {
+  public static decode(encodedString: string): queryString.ParsedQuery {
     // opaque cursors are base64 encoded, decode it first
     const decodedString = Buffer.from(encodedString, 'base64').toString();
 
     // cursor string is URL encoded, parse it into a map of parameters
-    return querystring.parse(decodedString, '&', '=', {
-      maxKeys: 20,
-    });
+    return queryString.parse(decodedString);
   }
 
   public static create(encodedString: string, schema: Joi.ObjectSchema): Cursor {
-    // opaque cursors are base64 encoded, decode it first
-    const decodedString = Buffer.from(encodedString, 'base64').toString();
-
-    // cursor string is URL encoded, parse it into a map of parameters
-    const parameters = querystring.parse(decodedString, '&', '=', {
-      maxKeys: 20,
-    });
+    const parameters = Cursor.decode(encodedString);
 
     // validate the cursor parameters match the schema we expect, this also converts data types
     const { error, value: validatedParameters } = schema.validate(parameters);
