@@ -5,7 +5,7 @@ import { ConnectionArgsValidationError, CursorValidationError } from '../error';
 
 export type OffsetCursorParameters = {
   offset: number;
-}
+};
 
 export class OffsetCursor extends Cursor<OffsetCursorParameters> {
   public static create(encodedString: string): OffsetCursor {

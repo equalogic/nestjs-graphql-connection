@@ -39,7 +39,7 @@ export class PersonConnection extends createConnectionType(PersonEdge) {}
 
 ### Create a Connection Arguments type
 
-Extend a class from `ConnectionArgs` class to have pagination arguments pre-defined for you. You can additionally 
+Extend a class from `ConnectionArgs` class to have pagination arguments pre-defined for you. You can additionally
 define your own arguments for filtering, etc.
 
 ```ts
@@ -51,7 +51,7 @@ export class PersonConnectionArgs extends ConnectionArgs {
   /*
    * PersonConnectionArgs will inherit `first`, `last`, `before`, `after`, and `page` fields from ConnectionArgs
    */
-  
+
   // Optional: example of a custom argument for filtering
   @Field(type => ID, { nullable: true })
   public personId?: string;
@@ -76,11 +76,9 @@ import { OffsetCursorPaginator } from 'nestjs-graphql-connection';
 @Resolver()
 export class PersonQueryResolver {
   @Query(returns => PersonConnection)
-  public async persons(
-    @Args() connectionArgs: PersonConnectionArgs,
-  ): Promise<PersonConnection> {
+  public async persons(@Args() connectionArgs: PersonConnectionArgs): Promise<PersonConnection> {
     const { personId } = connectionArgs;
-    
+
     // Example: Count the total number of matching persons (ignoring pagination)
     const totalPersons = await countPersons({ where: { personId } });
 
@@ -88,8 +86,8 @@ export class PersonQueryResolver {
     const paginator = OffsetCursorPaginator.createFromConnectionArgs(connectionArgs, totalPersons);
 
     // Example: Do whatever you need to do to fetch the current page of persons
-    const persons = await fetchPersons({ 
-      where: { personId }, 
+    const persons = await fetchPersons({
+      where: { personId },
       take: paginator.take, // how many rows to fetch
       skip: paginator.skip, // row offset to fetch from
     });
