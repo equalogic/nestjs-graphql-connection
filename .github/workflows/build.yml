@@ -51,7 +51,7 @@ jobs:
       # Setup
       - uses: actions/checkout@v2
         with:
-          token: ${{ secrets.MADSCI_BUILD_USER_TOKEN }} # allows commit of any fixes to trigger a new workflow run
+          token: ${{ secrets.BUILD_USER_TOKEN || github.token }} # allows commit of any fixes to trigger a new workflow run
       - name: Use Node.js 16.x
         uses: actions/setup-node@v2
         with:
@@ -72,9 +72,9 @@ jobs:
           eslint: true
           eslint_args: "--ext '.ts,.js' --ignore-path '.gitignore' --ignore-pattern '.github/*'"
           continue_on_error: false
-          auto_fix: true
-          git_name: Madbot
-          git_email: 64821814+madsci-bot@users.noreply.github.com
+          auto_fix: ${{ secrets.BUILD_USER_TOKEN && 'true' || 'false' }}
+          git_name: equabot
+          git_email: git@equalogic.com
 
   #
   # build job
