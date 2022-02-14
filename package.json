@@ -1,6 +1,6 @@
 {
   "name": "nestjs-graphql-connection",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Relay-style pagination for NestJS GraphQL server.",
   "author": "Equalogic Ltd",
   "license": "MIT",
