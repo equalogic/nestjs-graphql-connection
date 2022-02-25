@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16.x'
           always-auth: true
@@ -53,7 +53,7 @@ jobs:
         with:
           token: ${{ secrets.BUILD_USER_TOKEN || github.token }} # allows commit of any fixes to trigger a new workflow run
       - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16.x'
           always-auth: true
@@ -87,7 +87,7 @@ jobs:
       # Setup
       - uses: actions/checkout@v2
       - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16.x'
           always-auth: true
@@ -123,7 +123,7 @@ jobs:
       # Setup
       - uses: actions/checkout@v2
       - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16.x'
           always-auth: true
