@@ -34,7 +34,7 @@ jobs:
         if: steps.cache_npm.outputs.cache-hit != 'true'
         run: tar --use-compress-program "zstd -T0 --long=31 -1" -cf node_modules.tar.zstd -P node_modules
       - name: Persisting node_modules artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: node_modules.tar.zstd
           path: node_modules.tar.zstd
