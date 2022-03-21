@@ -23,7 +23,7 @@ jobs:
       # Dependencies
       - id: cache_npm
         name: Cache Node.js modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.npm
