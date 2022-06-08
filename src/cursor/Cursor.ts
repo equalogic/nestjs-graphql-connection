@@ -1,5 +1,12 @@
-import Joi from 'joi';
 import queryString, { StringifiableRecord } from 'query-string';
+
+export function decodeCursorString(encodedString: string): queryString.ParsedQuery {
+  // opaque cursors are base64 encoded, decode it first
+  const decodedString = Buffer.from(encodedString, 'base64').toString();
+
+  // cursor string is URL encoded, parse it into a map of parameters
+  return queryString.parse(decodedString);
+}
 
 export type CursorParameters = StringifiableRecord;
 
@@ -23,11 +30,7 @@ export class Cursor<TParams extends CursorParameters = CursorParameters> impleme
   }
 
   public static decode(encodedString: string): queryString.ParsedQuery {
-    // opaque cursors are base64 encoded, decode it first
-    const decodedString = Buffer.from(encodedString, 'base64').toString();
-
-    // cursor string is URL encoded, parse it into a map of parameters
-    return queryString.parse(decodedString);
+    return decodeCursorString(encodedString);
   }
 
   public static create(encodedString: string, schema: Joi.ObjectSchema): Cursor {
