@@ -3,5 +3,6 @@
  */
 
 export * from './Cursor';
+export * from './CursorPaginator';
 export * from './OffsetCursorPaginator';
 export * from './validateCursorParameters';
