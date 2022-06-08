@@ -8,14 +8,14 @@ interface CreateFromConnectionArgsOptions {
 }
 
 export class OffsetCursorPaginator {
-  public take: number = 20;
-  public skip: number = 0;
+  public edgesPerPage: number = 20;
   public totalEdges: number = 0;
+  public skip: number = 0;
 
-  constructor({ take, skip, totalEdges }: Pick<OffsetCursorPaginator, 'take' | 'skip' | 'totalEdges'>) {
-    this.take = take;
-    this.skip = skip;
+  constructor({ edgesPerPage, totalEdges, skip }: Pick<OffsetCursorPaginator, 'edgesPerPage' | 'totalEdges' | 'skip'>) {
+    this.edgesPerPage = edgesPerPage;
     this.totalEdges = totalEdges;
+    this.skip = skip;
   }
 
   public createPageInfo(edgesInPage: number): PageInfo {
@@ -38,7 +38,7 @@ export class OffsetCursorPaginator {
     options: CreateFromConnectionArgsOptions = {},
   ): OffsetCursorPaginator {
     const { defaultEdgesPerPage = 20, maxEdgesPerPage = 100 } = options;
-    let take: number = defaultEdgesPerPage;
+    let edgesPerPage: number = defaultEdgesPerPage;
     let skip: number = 0;
 
     if (first != null) {
@@ -48,7 +48,7 @@ export class OffsetCursorPaginator {
         );
       }
 
-      take = first;
+      edgesPerPage = first;
       skip = 0;
     }
 
@@ -65,7 +65,7 @@ export class OffsetCursorPaginator {
         );
       }
 
-      skip = take * (page - 1);
+      skip = edgesPerPage * (page - 1);
     }
 
     if (last != null) {
@@ -81,7 +81,7 @@ export class OffsetCursorPaginator {
         );
       }
 
-      take = last;
+      edgesPerPage = last;
       skip = totalEdges > last ? totalEdges - last : 0;
     }
 
@@ -100,7 +100,7 @@ export class OffsetCursorPaginator {
     }
 
     return new OffsetCursorPaginator({
-      take,
+      edgesPerPage,
       skip,
       totalEdges,
     });

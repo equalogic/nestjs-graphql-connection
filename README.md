@@ -88,7 +88,7 @@ export class PersonQueryResolver {
     // Example: Do whatever you need to do to fetch the current page of persons
     const persons = await fetchPersons({
       where: { personId },
-      take: paginator.take, // how many rows to fetch
+      take: paginator.edgesPerPage, // how many rows to fetch
       skip: paginator.skip, // row offset to fetch from
     });
 

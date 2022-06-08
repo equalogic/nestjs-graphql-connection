@@ -4,7 +4,7 @@ import { OffsetCursorPaginator } from './OffsetCursorPaginator';
 describe('OffsetCursorPaginator', () => {
   test('PageInfo is correct for first page', () => {
     const paginator = new OffsetCursorPaginator({
-      take: 20,
+      edgesPerPage: 20,
       skip: 0,
       totalEdges: 50,
     });
@@ -21,7 +21,7 @@ describe('OffsetCursorPaginator', () => {
 
   test('PageInfo is correct for second page', () => {
     const paginator = new OffsetCursorPaginator({
-      take: 20,
+      edgesPerPage: 20,
       skip: 20,
       totalEdges: 50,
     });
@@ -38,7 +38,7 @@ describe('OffsetCursorPaginator', () => {
 
   test('PageInfo is correct for last page', () => {
     const paginator = new OffsetCursorPaginator({
-      take: 20,
+      edgesPerPage: 20,
       skip: 40,
       totalEdges: 50,
     });
