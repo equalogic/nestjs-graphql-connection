@@ -1,4 +1,5 @@
-import { OffsetCursor, OffsetCursorPaginator } from './OffsetCursorPaginator';
+import { OffsetCursor } from './OffsetCursor';
+import { OffsetCursorPaginator } from './OffsetCursorPaginator';
 
 describe('OffsetCursorPaginator', () => {
   test('PageInfo is correct for first page', () => {
