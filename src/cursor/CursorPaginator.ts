@@ -38,7 +38,7 @@ export class CursorPaginator<
   }
 
   public createEdges(nodes: TNode[]): TEdge[] {
-    return nodes.map(node => this.edgeFactory.createEdge(node));
+    return nodes.map((node, index) => this.edgeFactory.createEdge(node, index));
   }
 
   public createPageInfo({ edges, hasMore }: { edges: EdgeInterface<any>[]; hasMore?: boolean }): PageInfo {
