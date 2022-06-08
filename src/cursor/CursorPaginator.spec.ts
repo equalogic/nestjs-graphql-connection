@@ -17,7 +17,7 @@ const testCursorSchema = Joi.object({
   id: Joi.string().empty('').required(),
 }).unknown(false);
 
-const testEdgeFactory: EdgeFactoryInterface<TestNode, TestEdge, TestCursorParams> = {
+const testEdgeFactory: EdgeFactoryInterface<TestEdge, TestNode, Cursor<TestCursorParams>> = {
   createEdge(node) {
     return new TestEdge({
       node,
@@ -27,7 +27,7 @@ const testEdgeFactory: EdgeFactoryInterface<TestNode, TestEdge, TestCursorParams
   createCursor(node) {
     return new Cursor({ id: node.id });
   },
-  decodeCursor(encodedString: string): Cursor<TestCursorParams> {
+  decodeCursor(encodedString: string) {
     return Cursor.fromString(encodedString, params => validateCursorParameters(params, testCursorSchema));
   },
 };

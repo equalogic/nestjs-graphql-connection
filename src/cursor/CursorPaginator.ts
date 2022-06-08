@@ -14,7 +14,7 @@ export class CursorPaginator<
   TParams extends CursorParameters = CursorParameters,
   TNode = any,
 > {
-  public edgeFactory: EdgeFactoryInterface<TNode, TEdge, TParams, Cursor<TParams>>;
+  public edgeFactory: EdgeFactoryInterface<TEdge, TNode, Cursor<TParams>>;
   public edgesPerPage: number = 20;
   public totalEdges?: number;
   public afterCursor?: Cursor<TParams>;
