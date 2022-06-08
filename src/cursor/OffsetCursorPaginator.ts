@@ -1,5 +1,5 @@
 import { ConnectionArgsValidationError } from '../error';
-import { EdgeFactoryInterface } from '../factory';
+import { EdgeFactory } from '../factory';
 import { ConnectionArgs, EdgeInterface, PageInfo } from '../type';
 import { OffsetCursor } from './OffsetCursor';
 
@@ -9,7 +9,7 @@ interface CreateFromConnectionArgsOptions {
 }
 
 export class OffsetCursorPaginator<TEdge extends EdgeInterface<TNode>, TNode = any> {
-  public edgeFactory: EdgeFactoryInterface<TEdge, TNode, OffsetCursor>;
+  public edgeFactory: EdgeFactory<TEdge, TNode, OffsetCursor>;
   public edgesPerPage: number = 20;
   public totalEdges?: number;
   public startOffset: number = 0;

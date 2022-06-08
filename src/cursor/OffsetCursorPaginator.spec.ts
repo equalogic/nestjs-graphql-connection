@@ -1,4 +1,4 @@
-import { EdgeFactoryInterface } from '../factory';
+import { EdgeFactory } from '../factory';
 import { createEdgeType } from '../type';
 import { OffsetCursor } from './OffsetCursor';
 import { OffsetCursorPaginator } from './OffsetCursorPaginator';
@@ -9,7 +9,7 @@ class TestNode {
 
 class TestEdge extends createEdgeType(TestNode) {}
 
-const testEdgeFactory: EdgeFactoryInterface<TestEdge, TestNode, OffsetCursor> = {
+const testEdgeFactory: EdgeFactory<TestEdge, TestNode, OffsetCursor> = {
   createEdge(node, offset) {
     return new TestEdge({
       node,

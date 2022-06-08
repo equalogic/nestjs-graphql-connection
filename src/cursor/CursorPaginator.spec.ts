@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { EdgeFactoryInterface } from '../factory';
+import { EdgeFactory } from '../factory';
 import { createEdgeType } from '../type';
 import { Cursor } from './Cursor';
 import { CursorPaginator } from './CursorPaginator';
@@ -17,7 +17,7 @@ const testCursorSchema = Joi.object({
   id: Joi.string().empty('').required(),
 }).unknown(false);
 
-const testEdgeFactory: EdgeFactoryInterface<TestEdge, TestNode, Cursor<TestCursorParams>> = {
+const testEdgeFactory: EdgeFactory<TestEdge, TestNode, Cursor<TestCursorParams>> = {
   createEdge(node) {
     return new TestEdge({
       node,
