@@ -106,4 +106,22 @@ describe('CursorPaginator', () => {
     expect(pageInfo.endCursor).toBeDefined();
     expect(Cursor.fromString(pageInfo.endCursor!).parameters.id).toStrictEqual('node12');
   });
+
+  test('PageInfo is correct for empty result', () => {
+    const paginator = new CursorPaginator<TestEdge, TestCursorParams>({
+      edgeFactory: testEdgeFactory,
+      edgesPerPage: 5,
+      totalEdges: 0,
+    });
+    const pageInfo = paginator.createPageInfo({
+      edges: paginator.createEdges([]),
+      hasMore: false,
+    });
+
+    expect(pageInfo.totalEdges).toBe(0);
+    expect(pageInfo.hasPreviousPage).toBe(false);
+    expect(pageInfo.hasNextPage).toBe(false);
+    expect(pageInfo.startCursor).toBeNull();
+    expect(pageInfo.endCursor).toBeNull();
+  });
 });

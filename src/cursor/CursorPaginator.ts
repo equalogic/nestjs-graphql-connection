@@ -43,8 +43,8 @@ export class CursorPaginator<
 
   public createPageInfo({ edges, hasMore }: { edges: TEdge[]; hasMore?: boolean }): PageInfo {
     return {
-      startCursor: edges[0].cursor,
-      endCursor: edges[edges.length - 1].cursor,
+      startCursor: edges.length > 0 ? edges[0].cursor : null,
+      endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
       hasNextPage: hasMore ?? (this.totalEdges != null && this.totalEdges > edges.length),
       hasPreviousPage: this.afterCursor != null || this.beforeCursor != null,
       totalEdges: this.totalEdges,
