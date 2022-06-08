@@ -1,5 +1,5 @@
 import { Cursor, CursorParameters } from '../cursor';
-import { EdgeInterface } from './Edge';
+import { EdgeInterface } from '../type/Edge';
 
 export interface EdgeFactoryInterface<
   TNode,

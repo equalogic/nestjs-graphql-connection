@@ -1,5 +1,6 @@
 import Joi from 'joi';
-import { createEdgeType, EdgeFactoryInterface } from '../type';
+import { EdgeFactoryInterface } from '../factory';
+import { createEdgeType } from '../type';
 import { Cursor } from './Cursor';
 import { CursorPaginator } from './CursorPaginator';
 import { validateCursorParameters } from './validateCursorParameters';

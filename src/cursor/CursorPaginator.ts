@@ -1,4 +1,5 @@
-import { ConnectionArgs, EdgeFactoryInterface, EdgeInterface, PageInfo } from '../type';
+import { EdgeFactoryInterface } from '../factory';
+import { ConnectionArgs, EdgeInterface, PageInfo } from '../type';
 import { Cursor, CursorParameters } from './Cursor';
 import { ConnectionArgsValidationError } from '../error';
 
