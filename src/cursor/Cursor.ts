@@ -33,16 +33,15 @@ export class Cursor<TParams extends CursorParameters = CursorParameters> impleme
     return decodeCursorString(encodedString);
   }
 
-  public static create(encodedString: string, schema: Joi.ObjectSchema): Cursor {
+  public static fromString<TParams extends CursorParameters = CursorParameters>(
+    encodedString: string,
+    validateParams?: (params: unknown) => TParams,
+  ): Cursor<TParams> {
     const parameters = Cursor.decode(encodedString);
 
-    // validate the cursor parameters match the schema we expect, this also converts data types
-    const { error, value: validatedParameters } = schema.validate(parameters);
+    // run the cursor parameters through the validation function, if we have one
+    const validatedParameters = validateParams != null ? validateParams(parameters) : (parameters as TParams);
 
-    if (error != null) {
-      throw error;
-    }
-
-    return new Cursor(validatedParameters);
+    return new Cursor<TParams>(validatedParameters);
   }
 }

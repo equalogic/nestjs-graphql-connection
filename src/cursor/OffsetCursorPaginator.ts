@@ -1,32 +1,44 @@
 import Joi from 'joi';
-import { ConnectionArgs, PageInfo } from '../type';
-import { Cursor } from './Cursor';
+import queryString from 'query-string';
 import { ConnectionArgsValidationError, CursorValidationError } from '../error';
+import { ConnectionArgs, PageInfo } from '../type';
+import { Cursor, CursorInterface, decodeCursorString } from './Cursor';
+import { validateCursorParameters } from './validateCursorParameters';
 
 export type OffsetCursorParameters = {
   offset: number;
 };
 
-export class OffsetCursor extends Cursor<OffsetCursorParameters> {
+const offsetCursorSchema = Joi.object<OffsetCursorParameters>({
+  offset: Joi.number().integer().min(0).empty('').required(),
+}).unknown(false);
+
+export class OffsetCursor implements CursorInterface<OffsetCursorParameters> {
+  constructor(public readonly parameters: OffsetCursorParameters) {}
+
+  public toString(): string {
+    return queryString.stringify(this.parameters);
+  }
+
+  public encode(): string {
+    return Buffer.from(this.toString()).toString('base64');
+  }
+
+  public static decode(encodedString: string): queryString.ParsedQuery {
+    return decodeCursorString(encodedString);
+  }
+
+  public static fromString(encodedString: string): OffsetCursor {
+    const parameters = OffsetCursor.decode(encodedString);
+
+    return new OffsetCursor(validateCursorParameters(parameters, offsetCursorSchema));
+  }
+
+  /**
+   * @deprecated
+   */
   public static create(encodedString: string): OffsetCursor {
-    const parameters = Cursor.decode(encodedString);
-
-    // validate the cursor parameters match the schema we expect, this also converts data types
-    const schema = Joi.object({
-      offset: Joi.number().integer().min(0).empty('').required(),
-    }).unknown(false);
-    const { error, value: validatedParameters } = schema.validate(parameters);
-
-    if (error != null) {
-      const errorMessages =
-        error.details != null ? error.details.map(detail => `- ${detail.message}`).join('\n') : `- ${error.message}`;
-
-      throw new CursorValidationError(
-        `A provided cursor value is not valid. The following problems were found:\n\n${errorMessages}`,
-      );
-    }
-
-    return new OffsetCursor(validatedParameters);
+    return OffsetCursor.fromString(encodedString);
   }
 }
 
@@ -103,7 +115,7 @@ export class OffsetCursorPaginator {
         );
       }
 
-      if (last > 100 || last < 1) {
+      if (last > maxEdgesPerPage || last < 1) {
         throw new ConnectionArgsValidationError(
           `The "last" argument accepts a value between 1 and ${maxEdgesPerPage}, inclusive.`,
         );
@@ -120,7 +132,7 @@ export class OffsetCursorPaginator {
         );
       }
 
-      skip = OffsetCursor.create(after).parameters.offset + 1;
+      skip = OffsetCursor.fromString(after).parameters.offset + 1;
     }
 
     if (before != null) {

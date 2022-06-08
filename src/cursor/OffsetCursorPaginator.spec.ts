@@ -13,9 +13,9 @@ describe('OffsetCursorPaginator', () => {
     expect(pageInfo.hasPreviousPage).toBe(false);
     expect(pageInfo.hasNextPage).toBe(true);
     expect(pageInfo.startCursor).toBeDefined();
-    expect(OffsetCursor.create(pageInfo.startCursor!).parameters.offset).toStrictEqual(0);
+    expect(OffsetCursor.fromString(pageInfo.startCursor!).parameters.offset).toStrictEqual(0);
     expect(pageInfo.endCursor).toBeDefined();
-    expect(OffsetCursor.create(pageInfo.endCursor!).parameters.offset).toStrictEqual(19);
+    expect(OffsetCursor.fromString(pageInfo.endCursor!).parameters.offset).toStrictEqual(19);
   });
 
   test('PageInfo is correct for second page', () => {
@@ -30,9 +30,9 @@ describe('OffsetCursorPaginator', () => {
     expect(pageInfo.hasPreviousPage).toBe(true);
     expect(pageInfo.hasNextPage).toBe(true);
     expect(pageInfo.startCursor).toBeDefined();
-    expect(OffsetCursor.create(pageInfo.startCursor!).parameters.offset).toStrictEqual(20);
+    expect(OffsetCursor.fromString(pageInfo.startCursor!).parameters.offset).toStrictEqual(20);
     expect(pageInfo.endCursor).toBeDefined();
-    expect(OffsetCursor.create(pageInfo.endCursor!).parameters.offset).toStrictEqual(39);
+    expect(OffsetCursor.fromString(pageInfo.endCursor!).parameters.offset).toStrictEqual(39);
   });
 
   test('PageInfo is correct for last page', () => {
@@ -47,9 +47,9 @@ describe('OffsetCursorPaginator', () => {
     expect(pageInfo.hasPreviousPage).toBe(true);
     expect(pageInfo.hasNextPage).toBe(false);
     expect(pageInfo.startCursor).toBeDefined();
-    expect(OffsetCursor.create(pageInfo.startCursor!).parameters.offset).toStrictEqual(40);
+    expect(OffsetCursor.fromString(pageInfo.startCursor!).parameters.offset).toStrictEqual(40);
     expect(pageInfo.endCursor).toBeDefined();
-    expect(OffsetCursor.create(pageInfo.endCursor!).parameters.offset).toStrictEqual(49);
+    expect(OffsetCursor.fromString(pageInfo.endCursor!).parameters.offset).toStrictEqual(49);
   });
 
   test('PageInfo is correct for fixed offset pagination', () => {
@@ -66,8 +66,8 @@ describe('OffsetCursorPaginator', () => {
     expect(pageInfo.hasPreviousPage).toBe(true);
     expect(pageInfo.hasNextPage).toBe(true);
     expect(pageInfo.startCursor).toBeDefined();
-    expect(OffsetCursor.create(pageInfo.startCursor!).parameters.offset).toStrictEqual(60);
+    expect(OffsetCursor.fromString(pageInfo.startCursor!).parameters.offset).toStrictEqual(60);
     expect(pageInfo.endCursor).toBeDefined();
-    expect(OffsetCursor.create(pageInfo.endCursor!).parameters.offset).toStrictEqual(79);
+    expect(OffsetCursor.fromString(pageInfo.endCursor!).parameters.offset).toStrictEqual(79);
   });
 });
