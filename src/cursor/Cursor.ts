@@ -3,8 +3,16 @@ import queryString, { StringifiableRecord } from 'query-string';
 
 export type CursorParameters = StringifiableRecord;
 
-export class Cursor<P = CursorParameters> {
-  constructor(public readonly parameters: P) {}
+export interface CursorInterface<TParams extends CursorParameters = CursorParameters> {
+  parameters: TParams;
+
+  toString(): string;
+
+  encode(): string;
+}
+
+export class Cursor<TParams extends CursorParameters = CursorParameters> implements CursorInterface<TParams> {
+  constructor(public readonly parameters: TParams) {}
 
   public toString(): string {
     return queryString.stringify(this.parameters);
