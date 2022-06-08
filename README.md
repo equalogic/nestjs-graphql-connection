@@ -83,24 +83,35 @@ export class PersonQueryResolver {
     const totalPersons = await countPersons({ where: { personId } });
 
     // Create paginator instance
-    const paginator = OffsetCursorPaginator.createFromConnectionArgs(connectionArgs, totalPersons);
+    const paginator = OffsetCursorPaginator.createFromConnectionArgs<PersonEdge>({
+      ...connectionArgs,
+      totalEdges: totalPersons,
+      edgeFactory: {
+        createEdge(node, offset) {
+          return new PersonEdge({
+            node,
+            cursor: this.createCursor(node, offset).encode(),
+          });
+        },
+        createCursor(node, offset) {
+          return new OffsetCursor({ offset });
+        },
+      }
+    });
 
     // Example: Do whatever you need to do to fetch the current page of persons
     const persons = await fetchPersons({
       where: { personId },
       take: paginator.edgesPerPage, // how many rows to fetch
-      skip: paginator.skip, // row offset to fetch from
+      skip: paginator.startOffset,  // row offset to fetch from
     });
+    
+    const edges = paginator.createEdges(persons);
 
     // Return resolved PersonConnection with edges and pageInfo
     return new PersonConnection({
-      pageInfo: paginator.createPageInfo(persons.length),
-      edges: persons.map((node, index) => {
-        return new PersonEdge({
-          node,
-          cursor: paginator.createCursor(index).encode(),
-        });
-      }),
+      pageInfo: paginator.createPageInfo({ edges }),
+      edges,
     });
   }
 }

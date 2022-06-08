@@ -69,6 +69,8 @@ export class CursorPaginator<
   }: Pick<CursorPaginator<TEdge, TParams, TNode>, 'edgeFactory' | 'totalEdges'> &
     ConnectionArgs &
     CreateFromConnectionArgsOptions): CursorPaginator<TEdge, TParams, TNode> {
+    const decodeCursor = edgeFactory.decodeCursor ?? (params => Cursor.fromString<TParams>(params));
+
     let edgesPerPage: number = defaultEdgesPerPage;
 
     if (page != null) {
@@ -112,8 +114,6 @@ export class CursorPaginator<
         );
       }
     }
-
-    const decodeCursor = edgeFactory.decodeCursor ?? (params => Cursor.fromString<TParams>(params));
 
     return new CursorPaginator<TEdge, TParams, TNode>({
       edgeFactory,

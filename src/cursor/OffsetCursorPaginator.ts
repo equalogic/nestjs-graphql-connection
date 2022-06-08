@@ -1,45 +1,63 @@
 import { ConnectionArgsValidationError } from '../error';
-import { ConnectionArgs, PageInfo } from '../type';
-import { OffsetCursor } from './OffsetCursor';
+import { EdgeFactoryInterface } from '../factory';
+import { ConnectionArgs, EdgeInterface, PageInfo } from '../type';
+import { Cursor } from './Cursor';
+import { OffsetCursor, OffsetCursorParameters } from './OffsetCursor';
 
 interface CreateFromConnectionArgsOptions {
   defaultEdgesPerPage?: number;
   maxEdgesPerPage?: number;
 }
 
-export class OffsetCursorPaginator {
+export class OffsetCursorPaginator<TEdge extends EdgeInterface<TNode>, TNode = any> {
+  public edgeFactory: EdgeFactoryInterface<TNode, TEdge, OffsetCursorParameters, OffsetCursor>;
   public edgesPerPage: number = 20;
-  public totalEdges: number = 0;
-  public skip: number = 0;
+  public totalEdges?: number;
+  public startOffset: number = 0;
 
-  constructor({ edgesPerPage, totalEdges, skip }: Pick<OffsetCursorPaginator, 'edgesPerPage' | 'totalEdges' | 'skip'>) {
+  constructor({
+    edgeFactory,
+    edgesPerPage,
+    totalEdges,
+    startOffset,
+  }: Pick<OffsetCursorPaginator<TEdge, TNode>, 'edgeFactory' | 'edgesPerPage' | 'totalEdges' | 'startOffset'>) {
+    this.edgeFactory = edgeFactory;
     this.edgesPerPage = edgesPerPage;
     this.totalEdges = totalEdges;
-    this.skip = skip;
+    this.startOffset = startOffset;
   }
 
-  public createPageInfo(edgesInPage: number): PageInfo {
+  public createEdges(nodes: TNode[]): TEdge[] {
+    return nodes.map((node, index) => this.edgeFactory.createEdge(node, this.startOffset + index));
+  }
+
+  public createPageInfo({ edges, hasMore }: { edges: TEdge[]; hasMore?: boolean }): PageInfo {
     return {
-      startCursor: edgesInPage > 0 ? this.createCursor(0).encode() : null,
-      endCursor: edgesInPage > 0 ? this.createCursor(edgesInPage - 1).encode() : null,
-      hasNextPage: this.skip + edgesInPage < this.totalEdges,
-      hasPreviousPage: this.skip > 0,
+      startCursor: edges.length > 0 ? edges[0].cursor : null,
+      endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
+      hasNextPage: hasMore ?? (this.totalEdges != null && this.startOffset + edges.length < this.totalEdges),
+      hasPreviousPage: this.startOffset > 0,
       totalEdges: this.totalEdges,
     };
   }
 
-  public createCursor(index: number): OffsetCursor {
-    return new OffsetCursor({ offset: this.skip + index });
-  }
+  public static createFromConnectionArgs<TEdge extends EdgeInterface<TNode>, TNode = any>({
+    edgeFactory,
+    totalEdges,
+    page,
+    first,
+    last,
+    before,
+    after,
+    defaultEdgesPerPage = 20,
+    maxEdgesPerPage = 100,
+  }: Pick<OffsetCursorPaginator<TEdge, TNode>, 'edgeFactory' | 'totalEdges'> &
+    ConnectionArgs &
+    CreateFromConnectionArgsOptions): OffsetCursorPaginator<TEdge, TNode> {
+    const decodeCursor = edgeFactory.decodeCursor ?? (params => OffsetCursor.fromString(params));
 
-  public static createFromConnectionArgs(
-    { page, first, last, before, after }: ConnectionArgs,
-    totalEdges: number,
-    options: CreateFromConnectionArgsOptions = {},
-  ): OffsetCursorPaginator {
-    const { defaultEdgesPerPage = 20, maxEdgesPerPage = 100 } = options;
     let edgesPerPage: number = defaultEdgesPerPage;
-    let skip: number = 0;
+    let startOffset: number = 0;
 
     if (first != null) {
       if (first > maxEdgesPerPage || first < 1) {
@@ -49,7 +67,7 @@ export class OffsetCursorPaginator {
       }
 
       edgesPerPage = first;
-      skip = 0;
+      startOffset = 0;
     }
 
     if (page != null) {
@@ -65,7 +83,7 @@ export class OffsetCursorPaginator {
         );
       }
 
-      skip = edgesPerPage * (page - 1);
+      startOffset = edgesPerPage * (page - 1);
     }
 
     if (last != null) {
@@ -82,7 +100,7 @@ export class OffsetCursorPaginator {
       }
 
       edgesPerPage = last;
-      skip = totalEdges > last ? totalEdges - last : 0;
+      startOffset = totalEdges != null && totalEdges > last ? totalEdges - last : 0;
     }
 
     if (after != null) {
@@ -92,17 +110,18 @@ export class OffsetCursorPaginator {
         );
       }
 
-      skip = OffsetCursor.fromString(after).parameters.offset + 1;
+      startOffset = decodeCursor(after).parameters.offset + 1;
     }
 
     if (before != null) {
       throw new ConnectionArgsValidationError('This connection does not support the "before" argument for pagination.');
     }
 
-    return new OffsetCursorPaginator({
+    return new OffsetCursorPaginator<TEdge, TNode>({
+      edgeFactory,
       edgesPerPage,
-      skip,
       totalEdges,
+      startOffset,
     });
   }
 }
