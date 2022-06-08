@@ -1,5 +1,5 @@
 import { EdgeFactory } from '../factory';
-import { ConnectionArgs, EdgeInterface, PageInfo } from '../type';
+import { ConnectionArgs, ConnectionInterface, EdgeInterface, PageInfo } from '../type';
 import { Cursor, CursorParameters } from './Cursor';
 import { ConnectionArgsValidationError } from '../error';
 
@@ -10,6 +10,7 @@ interface CreateFromConnectionArgsOptions {
 }
 
 export class CursorPaginator<
+  TConnection extends ConnectionInterface<TNode>,
   TEdge extends EdgeInterface<TNode>,
   TParams extends CursorParameters = CursorParameters,
   TNode = any,
@@ -27,7 +28,7 @@ export class CursorPaginator<
     afterCursor,
     beforeCursor,
   }: Pick<
-    CursorPaginator<TEdge, TParams, TNode>,
+    CursorPaginator<TConnection, TEdge, TParams, TNode>,
     'edgeFactory' | 'edgesPerPage' | 'totalEdges' | 'afterCursor' | 'beforeCursor'
   >) {
     this.edgeFactory = edgeFactory;
@@ -52,6 +53,7 @@ export class CursorPaginator<
   }
 
   public static createFromConnectionArgs<
+    TConnection extends ConnectionInterface<TNode>,
     TEdge extends EdgeInterface<TNode>,
     TParams extends CursorParameters = CursorParameters,
     TNode = any,
@@ -66,9 +68,9 @@ export class CursorPaginator<
     defaultEdgesPerPage = 20,
     maxEdgesPerPage = 100,
     allowReverseOrder = true,
-  }: Pick<CursorPaginator<TEdge, TParams, TNode>, 'edgeFactory' | 'totalEdges'> &
+  }: Pick<CursorPaginator<TConnection, TEdge, TParams, TNode>, 'edgeFactory' | 'totalEdges'> &
     ConnectionArgs &
-    CreateFromConnectionArgsOptions): CursorPaginator<TEdge, TParams, TNode> {
+    CreateFromConnectionArgsOptions): CursorPaginator<TConnection, TEdge, TParams, TNode> {
     const decodeCursor = edgeFactory.decodeCursor ?? (params => Cursor.fromString<TParams>(params));
 
     let edgesPerPage: number = defaultEdgesPerPage;
@@ -115,7 +117,7 @@ export class CursorPaginator<
       }
     }
 
-    return new CursorPaginator<TEdge, TParams, TNode>({
+    return new CursorPaginator<TConnection, TEdge, TParams, TNode>({
       edgeFactory,
       edgesPerPage,
       totalEdges,

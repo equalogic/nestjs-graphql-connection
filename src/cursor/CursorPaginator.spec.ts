@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import { EdgeFactory } from '../factory';
-import { createEdgeType } from '../type';
+import { createConnectionType, createEdgeType } from '../type';
 import { Cursor } from './Cursor';
 import { CursorPaginator } from './CursorPaginator';
 import { validateCursorParameters } from './validateCursorParameters';
@@ -10,6 +10,8 @@ class TestNode {
 }
 
 class TestEdge extends createEdgeType(TestNode) {}
+
+class TestConnection extends createConnectionType(TestEdge) {}
 
 type TestCursorParams = { id: string };
 
@@ -34,7 +36,7 @@ const testEdgeFactory: EdgeFactory<TestEdge, TestNode, Cursor<TestCursorParams>>
 
 describe('CursorPaginator', () => {
   test('PageInfo is correct for first page', () => {
-    const paginator = new CursorPaginator<TestEdge, TestCursorParams>({
+    const paginator = new CursorPaginator<TestConnection, TestEdge, TestCursorParams>({
       edgeFactory: testEdgeFactory,
       edgesPerPage: 5,
       totalEdges: 12,
@@ -60,7 +62,7 @@ describe('CursorPaginator', () => {
   });
 
   test('PageInfo is correct for second page', () => {
-    const paginator = new CursorPaginator<TestEdge, TestCursorParams>({
+    const paginator = new CursorPaginator<TestConnection, TestEdge, TestCursorParams>({
       edgeFactory: testEdgeFactory,
       edgesPerPage: 5,
       totalEdges: 12,
@@ -87,7 +89,7 @@ describe('CursorPaginator', () => {
   });
 
   test('PageInfo is correct for last page', () => {
-    const paginator = new CursorPaginator<TestEdge, TestCursorParams>({
+    const paginator = new CursorPaginator<TestConnection, TestEdge, TestCursorParams>({
       edgeFactory: testEdgeFactory,
       edgesPerPage: 5,
       totalEdges: 12,
@@ -108,7 +110,7 @@ describe('CursorPaginator', () => {
   });
 
   test('PageInfo is correct for empty result', () => {
-    const paginator = new CursorPaginator<TestEdge, TestCursorParams>({
+    const paginator = new CursorPaginator<TestConnection, TestEdge, TestCursorParams>({
       edgeFactory: testEdgeFactory,
       edgesPerPage: 5,
       totalEdges: 0,

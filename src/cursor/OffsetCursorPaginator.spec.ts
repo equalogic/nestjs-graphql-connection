@@ -1,5 +1,5 @@
 import { EdgeFactory } from '../factory';
-import { createEdgeType } from '../type';
+import { createConnectionType, createEdgeType } from '../type';
 import { OffsetCursor } from './OffsetCursor';
 import { OffsetCursorPaginator } from './OffsetCursorPaginator';
 
@@ -8,6 +8,8 @@ class TestNode {
 }
 
 class TestEdge extends createEdgeType(TestNode) {}
+
+class TestConnection extends createConnectionType(TestEdge) {}
 
 const testEdgeFactory: EdgeFactory<TestEdge, TestNode, OffsetCursor> = {
   createEdge(node, offset) {
@@ -23,7 +25,7 @@ const testEdgeFactory: EdgeFactory<TestEdge, TestNode, OffsetCursor> = {
 
 describe('OffsetCursorPaginator', () => {
   test('PageInfo is correct for first page', () => {
-    const paginator = new OffsetCursorPaginator<TestEdge>({
+    const paginator = new OffsetCursorPaginator<TestConnection, TestEdge>({
       edgeFactory: testEdgeFactory,
       edgesPerPage: 5,
       totalEdges: 12,
@@ -49,7 +51,7 @@ describe('OffsetCursorPaginator', () => {
   });
 
   test('PageInfo is correct for second page', () => {
-    const paginator = new OffsetCursorPaginator<TestEdge>({
+    const paginator = new OffsetCursorPaginator<TestConnection, TestEdge>({
       edgeFactory: testEdgeFactory,
       edgesPerPage: 5,
       totalEdges: 12,
@@ -75,7 +77,7 @@ describe('OffsetCursorPaginator', () => {
   });
 
   test('PageInfo is correct for last page', () => {
-    const paginator = new OffsetCursorPaginator<TestEdge>({
+    const paginator = new OffsetCursorPaginator<TestConnection, TestEdge>({
       edgeFactory: testEdgeFactory,
       edgesPerPage: 5,
       totalEdges: 12,
@@ -95,7 +97,7 @@ describe('OffsetCursorPaginator', () => {
   });
 
   test('PageInfo is correct for fixed offset pagination', () => {
-    const paginator = OffsetCursorPaginator.createFromConnectionArgs<TestEdge>({
+    const paginator = OffsetCursorPaginator.createFromConnectionArgs<TestConnection, TestEdge>({
       edgeFactory: testEdgeFactory,
       first: 5,
       page: 2,
@@ -121,7 +123,7 @@ describe('OffsetCursorPaginator', () => {
   });
 
   test('PageInfo is correct for empty result', () => {
-    const paginator = new OffsetCursorPaginator<TestEdge>({
+    const paginator = new OffsetCursorPaginator<TestConnection, TestEdge>({
       edgeFactory: testEdgeFactory,
       edgesPerPage: 5,
       totalEdges: 0,

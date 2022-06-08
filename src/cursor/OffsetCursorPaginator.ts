@@ -1,6 +1,6 @@
 import { ConnectionArgsValidationError } from '../error';
 import { EdgeFactory } from '../factory';
-import { ConnectionArgs, EdgeInterface, PageInfo } from '../type';
+import { ConnectionArgs, ConnectionInterface, EdgeInterface, PageInfo } from '../type';
 import { OffsetCursor } from './OffsetCursor';
 
 interface CreateFromConnectionArgsOptions {
@@ -8,7 +8,11 @@ interface CreateFromConnectionArgsOptions {
   maxEdgesPerPage?: number;
 }
 
-export class OffsetCursorPaginator<TEdge extends EdgeInterface<TNode>, TNode = any> {
+export class OffsetCursorPaginator<
+  TConnection extends ConnectionInterface<TNode>,
+  TEdge extends EdgeInterface<TNode>,
+  TNode = any,
+> {
   public edgeFactory: EdgeFactory<TEdge, TNode, OffsetCursor>;
   public edgesPerPage: number = 20;
   public totalEdges?: number;
@@ -19,7 +23,10 @@ export class OffsetCursorPaginator<TEdge extends EdgeInterface<TNode>, TNode = a
     edgesPerPage,
     totalEdges,
     startOffset,
-  }: Pick<OffsetCursorPaginator<TEdge, TNode>, 'edgeFactory' | 'edgesPerPage' | 'totalEdges' | 'startOffset'>) {
+  }: Pick<
+    OffsetCursorPaginator<TConnection, TEdge, TNode>,
+    'edgeFactory' | 'edgesPerPage' | 'totalEdges' | 'startOffset'
+  >) {
     this.edgeFactory = edgeFactory;
     this.edgesPerPage = edgesPerPage;
     this.totalEdges = totalEdges;
@@ -40,7 +47,11 @@ export class OffsetCursorPaginator<TEdge extends EdgeInterface<TNode>, TNode = a
     };
   }
 
-  public static createFromConnectionArgs<TEdge extends EdgeInterface<TNode>, TNode = any>({
+  public static createFromConnectionArgs<
+    TConnection extends ConnectionInterface<TNode>,
+    TEdge extends EdgeInterface<TNode>,
+    TNode = any,
+  >({
     edgeFactory,
     totalEdges,
     page,
@@ -50,9 +61,9 @@ export class OffsetCursorPaginator<TEdge extends EdgeInterface<TNode>, TNode = a
     after,
     defaultEdgesPerPage = 20,
     maxEdgesPerPage = 100,
-  }: Pick<OffsetCursorPaginator<TEdge, TNode>, 'edgeFactory' | 'totalEdges'> &
+  }: Pick<OffsetCursorPaginator<TConnection, TEdge, TNode>, 'edgeFactory' | 'totalEdges'> &
     ConnectionArgs &
-    CreateFromConnectionArgsOptions): OffsetCursorPaginator<TEdge, TNode> {
+    CreateFromConnectionArgsOptions): OffsetCursorPaginator<TConnection, TEdge, TNode> {
     const decodeCursor = edgeFactory.decodeCursor ?? (params => OffsetCursor.fromString(params));
 
     let edgesPerPage: number = defaultEdgesPerPage;
@@ -116,7 +127,7 @@ export class OffsetCursorPaginator<TEdge extends EdgeInterface<TNode>, TNode = a
       throw new ConnectionArgsValidationError('This connection does not support the "before" argument for pagination.');
     }
 
-    return new OffsetCursorPaginator<TEdge, TNode>({
+    return new OffsetCursorPaginator<TConnection, TEdge, TNode>({
       edgeFactory,
       edgesPerPage,
       totalEdges,
