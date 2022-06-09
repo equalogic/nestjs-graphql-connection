@@ -4,5 +4,4 @@
 
 export * from './cursor/index';
 export * from './error/index';
-export * from './factory/index';
 export * from './type/index';

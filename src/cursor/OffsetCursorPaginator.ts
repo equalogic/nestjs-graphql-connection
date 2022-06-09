@@ -1,6 +1,14 @@
 import { ConnectionArgsValidationError } from '../error';
-import { EdgeFactory } from '../factory';
-import { ConnectionArgs, ConnectionInterface, EdgeInterface, PageInfo } from '../type';
+import {
+  ConnectionArgs,
+  ConnectionFactoryFunction,
+  ConnectionInterface,
+  CursorDecoderFunction,
+  CursorFactoryFunction,
+  EdgeFactoryFunction,
+  EdgeInterface,
+  PageInfo,
+} from '../type';
 import { OffsetCursor } from './OffsetCursor';
 
 interface CreateFromConnectionArgsOptions {
@@ -8,33 +16,51 @@ interface CreateFromConnectionArgsOptions {
   maxEdgesPerPage?: number;
 }
 
+const defaultOffsetCursorDecoder: CursorDecoderFunction<OffsetCursor> = params => OffsetCursor.fromString(params);
+
 export class OffsetCursorPaginator<
   TConnection extends ConnectionInterface<TNode>,
   TEdge extends EdgeInterface<TNode>,
   TNode = any,
 > {
-  public edgeFactory: EdgeFactory<TEdge, TNode, OffsetCursor>;
+  public connectionFactory: ConnectionFactoryFunction<TConnection, TNode>;
+  public edgeFactory: EdgeFactoryFunction<TEdge, TNode>;
+  public cursorFactory: CursorFactoryFunction<TNode, OffsetCursor>;
+  public cursorDecoder: CursorDecoderFunction<OffsetCursor>;
   public edgesPerPage: number = 20;
   public totalEdges?: number;
   public startOffset: number = 0;
 
   constructor({
-    edgeFactory,
+    createConnection,
+    createEdge,
+    createCursor,
+    decodeCursor,
     edgesPerPage,
     totalEdges,
     startOffset,
-  }: Pick<
-    OffsetCursorPaginator<TConnection, TEdge, TNode>,
-    'edgeFactory' | 'edgesPerPage' | 'totalEdges' | 'startOffset'
-  >) {
-    this.edgeFactory = edgeFactory;
+  }: {
+    createConnection: ConnectionFactoryFunction<TConnection, TNode>;
+    createEdge: EdgeFactoryFunction<TEdge, TNode>;
+    createCursor?: CursorFactoryFunction<TNode, OffsetCursor>;
+    decodeCursor?: CursorDecoderFunction<OffsetCursor>;
+  } & Pick<OffsetCursorPaginator<TConnection, TEdge, TNode>, 'edgesPerPage' | 'totalEdges' | 'startOffset'>) {
+    this.connectionFactory = createConnection;
+    this.edgeFactory = createEdge;
+    this.cursorFactory = createCursor ?? ((node, offset) => new OffsetCursor({ offset }));
+    this.cursorDecoder = decodeCursor ?? defaultOffsetCursorDecoder;
     this.edgesPerPage = edgesPerPage;
     this.totalEdges = totalEdges;
     this.startOffset = startOffset;
   }
 
   public createEdges(nodes: TNode[]): TEdge[] {
-    return nodes.map((node, index) => this.edgeFactory.createEdge(node, this.startOffset + index));
+    return nodes.map((node, index) =>
+      this.edgeFactory({
+        node,
+        cursor: this.cursorFactory(node, this.startOffset + index).encode(),
+      }),
+    );
   }
 
   public createPageInfo({ edges, hasMore }: { edges: TEdge[]; hasMore?: boolean }): PageInfo {
@@ -52,7 +78,10 @@ export class OffsetCursorPaginator<
     TEdge extends EdgeInterface<TNode>,
     TNode = any,
   >({
-    edgeFactory,
+    createConnection,
+    createEdge,
+    createCursor,
+    decodeCursor = defaultOffsetCursorDecoder,
     totalEdges,
     page,
     first,
@@ -61,11 +90,13 @@ export class OffsetCursorPaginator<
     after,
     defaultEdgesPerPage = 20,
     maxEdgesPerPage = 100,
-  }: Pick<OffsetCursorPaginator<TConnection, TEdge, TNode>, 'edgeFactory' | 'totalEdges'> &
-    ConnectionArgs &
+  }: Pick<OffsetCursorPaginator<TConnection, TEdge, TNode>, 'totalEdges'> & {
+    createConnection: ConnectionFactoryFunction<TConnection, TNode>;
+    createEdge: EdgeFactoryFunction<TEdge, TNode>;
+    createCursor?: CursorFactoryFunction<TNode, OffsetCursor>;
+    decodeCursor?: CursorDecoderFunction<OffsetCursor>;
+  } & ConnectionArgs &
     CreateFromConnectionArgsOptions): OffsetCursorPaginator<TConnection, TEdge, TNode> {
-    const decodeCursor = edgeFactory.decodeCursor ?? (params => OffsetCursor.fromString(params));
-
     let edgesPerPage: number = defaultEdgesPerPage;
     let startOffset: number = 0;
 
@@ -128,7 +159,10 @@ export class OffsetCursorPaginator<
     }
 
     return new OffsetCursorPaginator<TConnection, TEdge, TNode>({
-      edgeFactory,
+      createConnection,
+      createEdge,
+      createCursor,
+      decodeCursor,
       edgesPerPage,
       totalEdges,
       startOffset,

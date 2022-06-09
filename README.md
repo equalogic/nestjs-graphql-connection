@@ -21,7 +21,8 @@ import { createEdgeType, EdgeInterface } from 'nestjs-graphql-connection';
 import { Person } from './entities';
 
 @ObjectType()
-export class PersonEdge extends createEdgeType(Person) implements EdgeInterface<Person> {}
+export class PersonEdge extends createEdgeType(Person) implements EdgeInterface<Person> {
+}
 ```
 
 ### Create a Connection type
@@ -34,7 +35,8 @@ import { ObjectType } from '@nestjs/graphql';
 import { createConnectionType } from 'nestjs-graphql-connection';
 
 @ObjectType()
-export class PersonConnection extends createConnectionType(PersonEdge) {}
+export class PersonConnection extends createConnectionType(PersonEdge) {
+}
 ```
 
 ### Create a Connection Arguments type
@@ -86,17 +88,15 @@ export class PersonQueryResolver {
     const paginator = OffsetCursorPaginator.createFromConnectionArgs<PersonEdge>({
       ...connectionArgs,
       totalEdges: totalPersons,
-      edgeFactory: {
-        createEdge(node, offset) {
-          return new PersonEdge({
-            node,
-            cursor: this.createCursor(node, offset).encode(),
-          });
-        },
-        createCursor(node, offset) {
-          return new OffsetCursor({ offset });
-        },
-      }
+      createEdge({ node, cursor }) {
+        return new PersonEdge({
+          node,
+          cursor,
+        });
+      },
+      createCursor(node, offset) {
+        return new OffsetCursor({ offset });
+      },
     });
 
     // Example: Do whatever you need to do to fetch the current page of persons
@@ -105,7 +105,7 @@ export class PersonQueryResolver {
       take: paginator.edgesPerPage, // how many rows to fetch
       skip: paginator.startOffset,  // row offset to fetch from
     });
-    
+
     const edges = paginator.createEdges(persons);
 
     // Return resolved PersonConnection with edges and pageInfo

@@ -1,6 +1,12 @@
 import Joi from 'joi';
-import { EdgeFactory } from '../factory';
-import { createConnectionType, createEdgeType } from '../type';
+import {
+  ConnectionFactoryFunction,
+  createConnectionType,
+  createEdgeType,
+  CursorDecoderFunction,
+  CursorFactoryFunction,
+  EdgeFactoryFunction,
+} from '../type';
 import { Cursor } from './Cursor';
 import { CursorPaginator } from './CursorPaginator';
 import { validateCursorParameters } from './validateCursorParameters';
@@ -19,25 +25,28 @@ const testCursorSchema = Joi.object({
   id: Joi.string().empty('').required(),
 }).unknown(false);
 
-const testEdgeFactory: EdgeFactory<TestEdge, TestNode, Cursor<TestCursorParams>> = {
-  createEdge(node) {
-    return new TestEdge({
-      node,
-      cursor: this.createCursor(node).encode(),
-    });
-  },
-  createCursor(node) {
-    return new Cursor({ id: node.id });
-  },
-  decodeCursor(encodedString: string) {
-    return Cursor.fromString(encodedString, params => validateCursorParameters(params, testCursorSchema));
-  },
-};
+const testConnectionFactory: ConnectionFactoryFunction<TestConnection, TestNode> = ({ edges, pageInfo }) =>
+  new TestConnection({ edges, pageInfo });
+
+const testEdgeFactory: EdgeFactoryFunction<TestEdge, TestNode> = ({ node, cursor }) =>
+  new TestEdge({
+    node,
+    cursor,
+  });
+
+const testCursorFactory: CursorFactoryFunction<TestNode, Cursor<TestCursorParams>> = node =>
+  new Cursor({ id: node.id });
+
+const testCursorDecoder: CursorDecoderFunction<Cursor<TestCursorParams>> = encodedString =>
+  Cursor.fromString(encodedString, params => validateCursorParameters(params, testCursorSchema));
 
 describe('CursorPaginator', () => {
   test('PageInfo is correct for first page', () => {
     const paginator = new CursorPaginator<TestConnection, TestEdge, TestCursorParams>({
-      edgeFactory: testEdgeFactory,
+      createConnection: testConnectionFactory,
+      createEdge: testEdgeFactory,
+      createCursor: testCursorFactory,
+      decodeCursor: testCursorDecoder,
       edgesPerPage: 5,
       totalEdges: 12,
     });
@@ -63,7 +72,10 @@ describe('CursorPaginator', () => {
 
   test('PageInfo is correct for second page', () => {
     const paginator = new CursorPaginator<TestConnection, TestEdge, TestCursorParams>({
-      edgeFactory: testEdgeFactory,
+      createConnection: testConnectionFactory,
+      createEdge: testEdgeFactory,
+      createCursor: testCursorFactory,
+      decodeCursor: testCursorDecoder,
       edgesPerPage: 5,
       totalEdges: 12,
       afterCursor: new Cursor<TestCursorParams>({ id: 'node5' }),
@@ -90,7 +102,10 @@ describe('CursorPaginator', () => {
 
   test('PageInfo is correct for last page', () => {
     const paginator = new CursorPaginator<TestConnection, TestEdge, TestCursorParams>({
-      edgeFactory: testEdgeFactory,
+      createConnection: testConnectionFactory,
+      createEdge: testEdgeFactory,
+      createCursor: testCursorFactory,
+      decodeCursor: testCursorDecoder,
       edgesPerPage: 5,
       totalEdges: 12,
       afterCursor: new Cursor<TestCursorParams>({ id: 'node10' }),
@@ -111,7 +126,10 @@ describe('CursorPaginator', () => {
 
   test('PageInfo is correct for empty result', () => {
     const paginator = new CursorPaginator<TestConnection, TestEdge, TestCursorParams>({
-      edgeFactory: testEdgeFactory,
+      createConnection: testConnectionFactory,
+      createEdge: testEdgeFactory,
+      createCursor: testCursorFactory,
+      decodeCursor: testCursorDecoder,
       edgesPerPage: 5,
       totalEdges: 0,
     });

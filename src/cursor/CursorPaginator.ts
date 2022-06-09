@@ -1,7 +1,15 @@
-import { EdgeFactory } from '../factory';
-import { ConnectionArgs, ConnectionInterface, EdgeInterface, PageInfo } from '../type';
-import { Cursor, CursorParameters } from './Cursor';
 import { ConnectionArgsValidationError } from '../error';
+import {
+  ConnectionArgs,
+  ConnectionFactoryFunction,
+  ConnectionInterface,
+  CursorDecoderFunction,
+  CursorFactoryFunction,
+  EdgeFactoryFunction,
+  EdgeInterface,
+  PageInfo,
+} from '../type';
+import { Cursor, CursorParameters } from './Cursor';
 
 interface CreateFromConnectionArgsOptions {
   defaultEdgesPerPage?: number;
@@ -15,23 +23,37 @@ export class CursorPaginator<
   TParams extends CursorParameters = CursorParameters,
   TNode = any,
 > {
-  public edgeFactory: EdgeFactory<TEdge, TNode, Cursor<TParams>>;
+  public connectionFactory: ConnectionFactoryFunction<TConnection, TNode>;
+  public edgeFactory: EdgeFactoryFunction<TEdge, TNode>;
+  public cursorFactory: CursorFactoryFunction<TNode, Cursor<TParams>>;
+  public cursorDecoder: CursorDecoderFunction<Cursor<TParams>>;
   public edgesPerPage: number = 20;
   public totalEdges?: number;
   public afterCursor?: Cursor<TParams>;
   public beforeCursor?: Cursor<TParams>;
 
   constructor({
-    edgeFactory,
+    createConnection,
+    createEdge,
+    createCursor,
+    decodeCursor,
     edgesPerPage,
     totalEdges,
     afterCursor,
     beforeCursor,
-  }: Pick<
+  }: {
+    createConnection: ConnectionFactoryFunction<TConnection, TNode>;
+    createEdge: EdgeFactoryFunction<TEdge, TNode>;
+    createCursor: CursorFactoryFunction<TNode, Cursor<TParams>>;
+    decodeCursor?: CursorDecoderFunction<Cursor<TParams>>;
+  } & Pick<
     CursorPaginator<TConnection, TEdge, TParams, TNode>,
-    'edgeFactory' | 'edgesPerPage' | 'totalEdges' | 'afterCursor' | 'beforeCursor'
+    'edgesPerPage' | 'totalEdges' | 'afterCursor' | 'beforeCursor'
   >) {
-    this.edgeFactory = edgeFactory;
+    this.connectionFactory = createConnection;
+    this.edgeFactory = createEdge;
+    this.cursorFactory = createCursor;
+    this.cursorDecoder = decodeCursor ?? (params => Cursor.fromString(params));
     this.edgesPerPage = edgesPerPage;
     this.totalEdges = totalEdges;
     this.afterCursor = afterCursor;
@@ -39,7 +61,7 @@ export class CursorPaginator<
   }
 
   public createEdges(nodes: TNode[]): TEdge[] {
-    return nodes.map((node, index) => this.edgeFactory.createEdge(node, index));
+    return nodes.map((node, index) => this.edgeFactory({ node, cursor: this.cursorFactory(node, index).encode() }));
   }
 
   public createPageInfo({ edges, hasMore }: { edges: TEdge[]; hasMore?: boolean }): PageInfo {
@@ -58,7 +80,10 @@ export class CursorPaginator<
     TParams extends CursorParameters = CursorParameters,
     TNode = any,
   >({
-    edgeFactory,
+    createConnection,
+    createEdge,
+    createCursor,
+    decodeCursor = params => Cursor.fromString(params),
     totalEdges,
     page,
     first,
@@ -68,11 +93,14 @@ export class CursorPaginator<
     defaultEdgesPerPage = 20,
     maxEdgesPerPage = 100,
     allowReverseOrder = true,
-  }: Pick<CursorPaginator<TConnection, TEdge, TParams, TNode>, 'edgeFactory' | 'totalEdges'> &
+  }: {
+    createConnection: ConnectionFactoryFunction<TConnection, TNode>;
+    createEdge: EdgeFactoryFunction<TEdge, TNode>;
+    createCursor: CursorFactoryFunction<TNode, Cursor<TParams>>;
+    decodeCursor?: CursorDecoderFunction<Cursor<TParams>>;
+  } & Pick<CursorPaginator<TConnection, TEdge, TParams, TNode>, 'totalEdges'> &
     ConnectionArgs &
     CreateFromConnectionArgsOptions): CursorPaginator<TConnection, TEdge, TParams, TNode> {
-    const decodeCursor = edgeFactory.decodeCursor ?? (params => Cursor.fromString<TParams>(params));
-
     let edgesPerPage: number = defaultEdgesPerPage;
 
     if (page != null) {
@@ -118,7 +146,10 @@ export class CursorPaginator<
     }
 
     return new CursorPaginator<TConnection, TEdge, TParams, TNode>({
-      edgeFactory,
+      createConnection,
+      createEdge,
+      createCursor,
+      decodeCursor,
       edgesPerPage,
       totalEdges,
       beforeCursor: before != null ? decodeCursor(before) : undefined,
