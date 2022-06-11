@@ -8,6 +8,8 @@
 npm i nestjs-graphql-connection
 ```
 
+[![npm version](https://badge.fury.io/js/nestjs-graphql-connection.svg)](https://badge.fury.io/js/nestjs-graphql-connection)
+
 ## Usage
 
 ### Create an Edge type
