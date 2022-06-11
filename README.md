@@ -286,3 +286,7 @@ return new PersonFriendConnection({
   edges,
 });
 ```
+
+## License
+
+[MIT](LICENSE)
