@@ -8,9 +8,13 @@ class TestNode {
   id: string;
 }
 
-class TestEdge extends createEdgeType(TestNode) {}
+class TestEdge extends createEdgeType(TestNode) {
+  customEdgeField?: number;
+}
 
-class TestConnection extends createConnectionType(TestEdge) {}
+class TestConnection extends createConnectionType(TestEdge) {
+  customConnectionField?: number;
+}
 
 type TestCursorParams = { id: string };
 
@@ -158,6 +162,46 @@ describe('ConnectionBuilder', () => {
         endCursor: null,
       },
       edges: [],
+    });
+  });
+
+  test('Can override createConnection and createEdge when building Connection', () => {
+    const builder = new TestConnectionBuilder({
+      first: 5,
+    });
+    const connection = builder.build({
+      totalEdges: 12,
+      nodes: [{ id: 'node1' }, { id: 'node2' }, { id: 'node3' }, { id: 'node4' }, { id: 'node5' }],
+      createConnection: ({ edges, pageInfo }) => {
+        const connection = new TestConnection({ edges, pageInfo });
+        connection.customConnectionField = 99;
+
+        return connection;
+      },
+      createEdge: ({ node, cursor }) => {
+        const edge = new TestEdge({ node, cursor });
+        edge.customEdgeField = 99;
+
+        return edge;
+      },
+    });
+
+    expect(connection).toMatchObject({
+      pageInfo: {
+        totalEdges: 12,
+        hasNextPage: true,
+        hasPreviousPage: false,
+        startCursor: new Cursor({ id: 'node1' }).encode(),
+        endCursor: new Cursor({ id: 'node5' }).encode(),
+      },
+      edges: [
+        { node: { id: 'node1' }, cursor: new Cursor({ id: 'node1' }).encode(), customEdgeField: 99 },
+        { node: { id: 'node2' }, cursor: new Cursor({ id: 'node2' }).encode(), customEdgeField: 99 },
+        { node: { id: 'node3' }, cursor: new Cursor({ id: 'node3' }).encode(), customEdgeField: 99 },
+        { node: { id: 'node4' }, cursor: new Cursor({ id: 'node4' }).encode(), customEdgeField: 99 },
+        { node: { id: 'node5' }, cursor: new Cursor({ id: 'node5' }).encode(), customEdgeField: 99 },
+      ],
+      customConnectionField: 99,
     });
   });
 });
