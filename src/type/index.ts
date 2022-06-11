@@ -6,4 +6,3 @@ export * from './Connection';
 export * from './ConnectionArgs';
 export * from './Edge';
 export * from './PageInfo';
-export * from './factories';
