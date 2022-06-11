@@ -105,7 +105,7 @@ Your resolvers can now return your `Connection` as an object type. Use your `Con
 page of results to fetch and to create the `PageInfo`, cursors, and edges in the result.
 
 ```ts
-import { Query, Resolver } from '@nestjs/graphql';
+import { Args, Query, Resolver } from '@nestjs/graphql';
 
 @Resolver()
 export class PersonQueryResolver {
@@ -173,7 +173,7 @@ to begin the result set. For example, this works with SQL databases that accept 
 queries.
 
 ```ts
-import { Query, Resolver } from '@nestjs/graphql';
+import { Args, Query, Resolver } from '@nestjs/graphql';
 
 @Resolver()
 export class PersonQueryResolver {
@@ -201,4 +201,88 @@ export class PersonQueryResolver {
     });
   }
 }
+```
+
+### Enriching Edges with additional metadata
+
+The previous examples are sufficient for resolving connections that represent simple lists of objects with pagination.
+However, sometimes you need to model connections and edges that contain additional metadata. For example, you might
+relate `Person` objects together into networks of friends using a `PersonFriendConnection` containing `PersonFriendEdge`
+edges. In this case the `node` on each edge is still a `Person` object, but the relationship itself may have
+properties -- such as the date that the friend was added, or the type of relationship. (In relational database terms
+this is analogous to having a Many-to-Many relation where the intermediate join table contains additional data columns
+beyond just the keys of the two joined tables.)
+
+`ConnectionBuilder` supports this use case by enabling the `createConnection()` and `createEdge()` methods to be
+overridden when calling `build()`. This allows you to enrich the connection and edges with data that is only available
+at resolve time.
+
+The following example assumes you have a GraphQL schema that defines a `friends` field on your `Person` object, which
+resolves to a `PersonFriendConnection` containing the person's friends. In your database you would have a `friend` table
+that relates a `person` to an `otherPerson`, and that relationship has a `createdAt` date.
+
+```ts
+import { Args, ResolveField, Resolver, Root } from '@nestjs/graphql';
+
+@Resolver(of => Person)
+export class PersonResolver {
+  @ResolveField(returns => PersonFriendConnection)
+  public async friends(
+    @Root() person: Person,
+    @Args() connectionArgs: PersonFriendConnectionArgs,
+  ): Promise<PersonFriendConnection> {
+    // Create builder instance
+    const connectionBuilder = new PersonFriendConnectionBuilder(connectionArgs);
+
+    // EXAMPLE: Count the total number of this person's friends (without pagination)
+    const totalEdges = await countFriends({ where: { personId: person.id } });
+
+    // EXAMPLE: Do whatever you need to do to fetch the current page of this person's friends
+    const friends = await fetchFriends({
+      where: { personId: person.id },
+      take: connectionBuilder.edgesPerPage, // how many rows to fetch
+    });
+
+    // Return resolved PersonFriendConnection with edges and pageInfo
+    return connectionBuilder.build({
+      totalEdges,
+      nodes: friends.map(friend => friend.otherPerson),
+      createEdge: ({ node, cursor }) => {
+        const friend = friends.find(friend => friend.otherPerson.id === node.id);
+
+        const edge = new PersonFriendEdge({ node, cursor });
+        edge.createdAt = friend.createdAt;
+
+        return edge;
+      }
+    });
+  }
+}
+```
+
+Alternatively, you could build the connection result yourself by replacing the `connectionBuilder.build(...)` statement
+with something like the following:
+
+```ts
+// Resolve edges with cursor, node, and additional metadata
+const edges = friends.map((friend, index) => {
+  const edge = new PersonFriendEdge({
+    cursor: connectionBuilder.createCursor(friend.otherPerson, index),
+    node: friend.otherPerson,
+  });
+  edge.createdAt = friend.createdAt;
+
+  return edge;
+});
+
+// Return resolved PersonFriendConnection
+return new PersonFriendConnection({
+  pageInfo: connectionBuilder.createPageInfo({
+    edges,
+    totalEdges,
+    hasNextPage: true,
+    hasPreviousPage: false,
+  }),
+  edges,
+});
 ```
