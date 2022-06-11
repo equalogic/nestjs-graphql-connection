@@ -54,16 +54,50 @@ export class PersonConnectionArgs extends ConnectionArgs {
    * PersonConnectionArgs will inherit `first`, `last`, `before`, `after`, and `page` fields from ConnectionArgs
    */
 
-  // Optional: example of a custom argument for filtering
+  // EXAMPLE: Defining a custom argument for filtering
   @Field(type => ID, { nullable: true })
   public personId?: string;
 }
 ```
 
-### Return a Connection from a Query Resolver
+### Create a Connection Builder
 
-Your resolvers can return a `Connection` as an object type. Use a `Paginator` class to help you determine which page
-of results to fetch and to create `PageInfo` and cursors in the result.
+Now define a `ConnectionBuilder` class for your `Connection` object. The builder is responsible for interpreting
+pagination arguments for the connection, and creating the cursors and `Edge` objects that make up the connection.
+
+```ts
+import { ConnectionBuilder, Cursor, PageInfo, validateCursorParameters } from 'nestjs-graphql-connection';
+
+export type PersonCursorParams = { id: string };
+export type PersonCursor = Cursor<PersonCursorParams>;
+
+export class PersonConnectionBuilder extends ConnectionBuilder<PersonConnection, PersonEdge, Person, PersonCursor> {
+  public createConnection(fields: { edges: PersonEdge[]; pageInfo: PageInfo }): PersonConnection {
+    return new PersonConnection(fields);
+  }
+
+  public createEdge(fields: { node: TestNode; cursor: string }): TestEdge {
+    return new PersonEdge(fields);
+  }
+
+  public createCursor(node: Person): PersonCursor {
+    return new Cursor({ id: node.id });
+  }
+
+  public decodeCursor(encodedString: string): PersonCursor {
+    // A cursor sent to or received from a client is represented as a base64-encoded, URL-style query string containing
+    // one or more key/value pairs describing the referenced node's position in the result set (its ID, a date, etc.)
+    // Validation is optional, but recommended to enforce that cursor values supplied by clients must be well-formed.
+    // See documentation for Joi at https://joi.dev/api/?v=17#object
+    // The following schema accepts only an object matching the type { id: string }:
+    const schema: Joi.ObjectSchema<PersonCursorParams> = Joi.object({
+      id: Joi.string().empty('').required(),
+    }).unknown(false);
+
+    return Cursor.fromString(encodedString, params => validateCursorParameters(params, schema));
+  }
+}
+```
 
 #### Using Offset Pagination
 
@@ -71,9 +105,15 @@ With offset pagination, cursor values are an encoded representation of the row o
 paginate by specifying either an `after` argument with the cursor of the last row on the previous page, or to pass a
 `page` argument with an explicit page number (based on the rows per page set by the `first` argument).
 
+(TODO)
+
+### Return a Connection from a Query Resolver
+
+Your resolvers can return a `Connection` as an object type. Use your `ConnectionBuilder` class to determine which page
+of results to fetch and to create `PageInfo`, cursors, and edges in the result.
+
 ```ts
 import { Query, Resolver } from '@nestjs/graphql';
-import { OffsetCursorPaginator } from 'nestjs-graphql-connection';
 
 @Resolver()
 export class PersonQueryResolver {
@@ -81,44 +121,23 @@ export class PersonQueryResolver {
   public async persons(@Args() connectionArgs: PersonConnectionArgs): Promise<PersonConnection> {
     const { personId } = connectionArgs;
 
-    // Example: Count the total number of matching persons (ignoring pagination)
-    const totalPersons = await countPersons({ where: { personId } });
+    // Create builder instance
+    const connectionBuilder = new PersonConnectionBuilder(connectionArgs);
 
-    // Create paginator instance
-    const paginator = OffsetCursorPaginator.createFromConnectionArgs<PersonEdge>({
-      ...connectionArgs,
-      totalEdges: totalPersons,
-      createEdge({ node, cursor }) {
-        return new PersonEdge({
-          node,
-          cursor,
-        });
-      },
-      createCursor(node, offset) {
-        return new OffsetCursor({ offset });
-      },
-    });
+    // EXAMPLE: Count the total number of matching persons (without pagination)
+    const totalEdges = await countPersons({ where: { personId } });
 
-    // Example: Do whatever you need to do to fetch the current page of persons
+    // EXAMPLE: Do whatever you need to do to fetch the current page of persons
     const persons = await fetchPersons({
       where: { personId },
-      take: paginator.edgesPerPage, // how many rows to fetch
-      skip: paginator.startOffset,  // row offset to fetch from
+      take: connectionBuilder.edgesPerPage, // how many rows to fetch
     });
 
-    const edges = paginator.createEdges(persons);
-
     // Return resolved PersonConnection with edges and pageInfo
-    return new PersonConnection({
-      pageInfo: paginator.createPageInfo({ edges }),
-      edges,
+    return connectionBuilder.build({
+      totalEdges,
+      nodes: persons,
     });
   }
 }
 ```
-
-#### Using Cursor Pagination
-
-🚧 **WIP** 🚧
-
-_Cursors are ready but there is no Paginator class implementation yet._
