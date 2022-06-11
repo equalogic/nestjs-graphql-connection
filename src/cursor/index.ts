@@ -4,5 +4,4 @@
 
 export * from './Cursor';
 export * from './OffsetCursor';
-export * from './OffsetCursorPaginator';
 export * from './validateCursorParameters';
