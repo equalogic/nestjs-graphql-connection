@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { CursorValidationError } from '../error';
 import { CursorParameters } from './Cursor';
 
-export function validateCursorParameters<TParams = CursorParameters>(
+export function validateParamsUsingSchema<TParams = CursorParameters>(
   parameters: unknown,
   schema: Joi.ObjectSchema<TParams>,
 ): TParams {

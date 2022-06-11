@@ -4,4 +4,4 @@
 
 export * from './Cursor';
 export * from './OffsetCursor';
-export * from './validateCursorParameters';
+export * from './validateParamsUsingSchema';

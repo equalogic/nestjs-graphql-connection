@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import { Cursor } from '../cursor/Cursor';
-import { validateCursorParameters } from '../cursor/validateCursorParameters';
+import { validateParamsUsingSchema } from '../cursor/validateParamsUsingSchema';
 import { createConnectionType, createEdgeType, PageInfo } from '../type';
 import { ConnectionBuilder } from './ConnectionBuilder';
 
@@ -34,7 +34,7 @@ class TestConnectionBuilder extends ConnectionBuilder<TestConnection, TestEdge, 
       id: Joi.string().empty('').required(),
     }).unknown(false);
 
-    return Cursor.fromString(encodedString, params => validateCursorParameters(params, schema));
+    return Cursor.fromString(encodedString, params => validateParamsUsingSchema(params, schema));
   }
 }
 

@@ -66,7 +66,7 @@ Now define a `ConnectionBuilder` class for your `Connection` object. The builder
 pagination arguments for the connection, and creating the cursors and `Edge` objects that make up the connection.
 
 ```ts
-import { ConnectionBuilder, Cursor, PageInfo, validateCursorParameters } from 'nestjs-graphql-connection';
+import { ConnectionBuilder, Cursor, PageInfo, validateParamsUsingSchema } from 'nestjs-graphql-connection';
 
 export type PersonCursorParams = { id: string };
 export type PersonCursor = Cursor<PersonCursorParams>;
@@ -94,7 +94,7 @@ export class PersonConnectionBuilder extends ConnectionBuilder<PersonConnection,
       id: Joi.string().empty('').required(),
     }).unknown(false);
 
-    return Cursor.fromString(encodedString, params => validateCursorParameters(params, schema));
+    return Cursor.fromString(encodedString, params => validateParamsUsingSchema(params, schema));
   }
 }
 ```

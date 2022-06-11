@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import queryString from 'query-string';
 import { CursorInterface, decodeCursorString } from './Cursor';
-import { validateCursorParameters } from './validateCursorParameters';
+import { validateParamsUsingSchema } from './validateParamsUsingSchema';
 
 export type OffsetCursorParameters = {
   offset: number;
@@ -28,7 +28,7 @@ export class OffsetCursor implements CursorInterface<OffsetCursorParameters> {
   public static fromString(encodedString: string): OffsetCursor {
     const parameters = OffsetCursor.decode(encodedString);
 
-    return new OffsetCursor(validateCursorParameters(parameters, offsetCursorSchema));
+    return new OffsetCursor(validateParamsUsingSchema(parameters, offsetCursorSchema));
   }
 
   /**
