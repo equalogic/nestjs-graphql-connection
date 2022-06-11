@@ -60,7 +60,7 @@ export class PersonConnectionArgs extends ConnectionArgs {
 }
 ```
 
-### Create a Connection Builder
+### Create a Connection Builder and resolve a Connection
 
 Now define a `ConnectionBuilder` class for your `Connection` object. The builder is responsible for interpreting
 pagination arguments for the connection, and creating the cursors and `Edge` objects that make up the connection.
@@ -99,18 +99,8 @@ export class PersonConnectionBuilder extends ConnectionBuilder<PersonConnection,
 }
 ```
 
-#### Using Offset Pagination
-
-With offset pagination, cursor values are an encoded representation of the row offset. It is possible for clients to
-paginate by specifying either an `after` argument with the cursor of the last row on the previous page, or to pass a
-`page` argument with an explicit page number (based on the rows per page set by the `first` argument).
-
-(TODO)
-
-### Return a Connection from a Query Resolver
-
-Your resolvers can return a `Connection` as an object type. Use your `ConnectionBuilder` class to determine which page
-of results to fetch and to create `PageInfo`, cursors, and edges in the result.
+Your resolvers can now return your `Connection` as an object type. Use your `ConnectionBuilder` class to determine which
+page of results to fetch and to create the `PageInfo`, cursors, and edges in the result.
 
 ```ts
 import { Query, Resolver } from '@nestjs/graphql';
@@ -131,6 +121,75 @@ export class PersonQueryResolver {
     const persons = await fetchPersons({
       where: { personId },
       take: connectionBuilder.edgesPerPage, // how many rows to fetch
+    });
+
+    // Return resolved PersonConnection with edges and pageInfo
+    return connectionBuilder.build({
+      totalEdges,
+      nodes: persons,
+    });
+  }
+}
+```
+
+### Using Offset Pagination
+
+With offset pagination, cursor values are an encoded representation of the row offset. It is possible for clients to
+paginate by specifying either an `after` argument with the cursor of the last row on the previous page, or to pass a
+`page` argument with an explicit page number (based on the rows per page set by the `first` argument). Offset paginated
+connections do not support the `last` or `before` connection arguments, results must be fetched in forward order.
+
+Offset pagination is useful when you want to be able to retrieve a page of edges at an arbitrary position in the result
+set, without knowing anything about the intermediate entries. For example, to link to "page 10" without first
+determining what the last result was on page 9.
+
+To use offset cursors, extend your builder class from `OffsetPaginatedConnectionBuilder` instead of `ConnectionBuilder`:
+
+```ts
+import {
+  OffsetPaginatedConnectionBuilder,
+  PageInfo,
+  validateParamsUsingSchema
+} from 'nestjs-graphql-connection';
+
+export class PersonConnectionBuilder extends OffsetPaginatedConnectionBuilder<PersonConnection, PersonEdge, Person> {
+  public createConnection(fields: { edges: PersonEdge[]; pageInfo: PageInfo }): PersonConnection {
+    return new PersonConnection(fields);
+  }
+
+  public createEdge(fields: { node: TestNode; cursor: string }): TestEdge {
+    return new PersonEdge(fields);
+  }
+
+  // When extending from OffsetPaginatedConnectionBuilder, cursor encoding/decoding always uses the OffsetCursor type.
+  // So it's not necessary to implement the createCursor() or decodeCursor() methods here.
+}
+```
+
+In your resolver, you can use the `startOffset` property of the builder to determine the zero-indexed offset from which
+to begin the result set. For example, this works with SQL databases that accept a `SKIP` or `OFFSET` parameter in
+queries.
+
+```ts
+import { Query, Resolver } from '@nestjs/graphql';
+
+@Resolver()
+export class PersonQueryResolver {
+  @Query(returns => PersonConnection)
+  public async persons(@Args() connectionArgs: PersonConnectionArgs): Promise<PersonConnection> {
+    const { personId } = connectionArgs;
+
+    // Create builder instance
+    const connectionBuilder = new PersonConnectionBuilder(connectionArgs);
+
+    // EXAMPLE: Count the total number of matching persons (without pagination)
+    const totalEdges = await countPersons({ where: { personId } });
+
+    // EXAMPLE: Do whatever you need to do to fetch the current page of persons
+    const persons = await fetchPersons({
+      where: { personId },
+      take: connectionBuilder.edgesPerPage, // how many rows to fetch
+      skip: connectionBuilder.startOffset,  // row offset to start at
     });
 
     // Return resolved PersonConnection with edges and pageInfo
