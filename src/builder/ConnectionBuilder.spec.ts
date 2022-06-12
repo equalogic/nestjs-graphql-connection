@@ -12,7 +12,7 @@ class TestEdge extends createEdgeType<{ customEdgeField?: number }>(TestNode) {
   public customEdgeField?: number;
 }
 
-class TestConnection extends createConnectionType(TestEdge) {
+class TestConnection extends createConnectionType<{ customConnectionField?: number }>(TestEdge) {
   public customConnectionField?: number;
 }
 
@@ -172,12 +172,7 @@ describe('ConnectionBuilder', () => {
     const connection = builder.build({
       totalEdges: 12,
       nodes: [{ id: 'node1' }, { id: 'node2' }, { id: 'node3' }, { id: 'node4' }, { id: 'node5' }],
-      createConnection: ({ edges, pageInfo }) => {
-        const connection = new TestConnection({ edges, pageInfo });
-        connection.customConnectionField = 99;
-
-        return connection;
-      },
+      createConnection: ({ edges, pageInfo }) => new TestConnection({ edges, pageInfo, customConnectionField: 99 }),
       createEdge: ({ node, cursor }) => new TestEdge({ node, cursor, customEdgeField: 99 }),
     });
 
