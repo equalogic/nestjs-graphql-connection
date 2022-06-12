@@ -1,9 +1,8 @@
 import * as GQL from '@nestjs/graphql';
-import * as Relay from 'graphql-relay';
 import { EdgeInterface } from './Edge';
 import { PageInfo } from './PageInfo';
 
-export interface ConnectionInterface<TNode> extends Relay.Connection<TNode> {
+export interface ConnectionInterface<TNode> {
   pageInfo: PageInfo;
   edges: EdgeInterface<TNode>[];
 }
