@@ -6,6 +6,7 @@ import { ConnectionBuilder } from './ConnectionBuilder';
 
 class TestNode {
   id: string;
+  name: string;
 }
 
 class TestEdge extends createEdgeType<{ customEdgeField?: number }>(TestNode) {
@@ -16,9 +17,11 @@ class TestConnection extends createConnectionType<{ customConnectionField?: numb
   public customConnectionField?: number;
 }
 
-class TestConnectionArgs extends ConnectionArgs {}
+class TestConnectionArgs extends ConnectionArgs {
+  public sortOption?: string;
+}
 
-type TestCursorParams = { id: string };
+type TestCursorParams = { id?: string; name?: string };
 
 type TestCursor = Cursor<TestCursorParams>;
 
@@ -62,7 +65,13 @@ describe('ConnectionBuilder', () => {
 
     const connection = builder.build({
       totalEdges: 12,
-      nodes: [{ id: 'node1' }, { id: 'node2' }, { id: 'node3' }, { id: 'node4' }, { id: 'node5' }],
+      nodes: [
+        { id: 'node1', name: 'A' },
+        { id: 'node2', name: 'B' },
+        { id: 'node3', name: 'C' },
+        { id: 'node4', name: 'D' },
+        { id: 'node5', name: 'E' },
+      ],
     });
 
     expect(connection).toMatchObject({
@@ -74,11 +83,11 @@ describe('ConnectionBuilder', () => {
         endCursor: new Cursor({ id: 'node5' }).encode(),
       },
       edges: [
-        { node: { id: 'node1' }, cursor: new Cursor({ id: 'node1' }).encode() },
-        { node: { id: 'node2' }, cursor: new Cursor({ id: 'node2' }).encode() },
-        { node: { id: 'node3' }, cursor: new Cursor({ id: 'node3' }).encode() },
-        { node: { id: 'node4' }, cursor: new Cursor({ id: 'node4' }).encode() },
-        { node: { id: 'node5' }, cursor: new Cursor({ id: 'node5' }).encode() },
+        { node: { id: 'node1', name: 'A' }, cursor: new Cursor({ id: 'node1' }).encode() },
+        { node: { id: 'node2', name: 'B' }, cursor: new Cursor({ id: 'node2' }).encode() },
+        { node: { id: 'node3', name: 'C' }, cursor: new Cursor({ id: 'node3' }).encode() },
+        { node: { id: 'node4', name: 'D' }, cursor: new Cursor({ id: 'node4' }).encode() },
+        { node: { id: 'node5', name: 'E' }, cursor: new Cursor({ id: 'node5' }).encode() },
       ],
     });
   });
@@ -95,7 +104,13 @@ describe('ConnectionBuilder', () => {
 
     const connection = builder.build({
       totalEdges: 12,
-      nodes: [{ id: 'node6' }, { id: 'node7' }, { id: 'node8' }, { id: 'node9' }, { id: 'node10' }],
+      nodes: [
+        { id: 'node6', name: 'F' },
+        { id: 'node7', name: 'G' },
+        { id: 'node8', name: 'H' },
+        { id: 'node9', name: 'I' },
+        { id: 'node10', name: 'J' },
+      ],
     });
 
     expect(connection).toMatchObject({
@@ -107,11 +122,11 @@ describe('ConnectionBuilder', () => {
         endCursor: new Cursor({ id: 'node10' }).encode(),
       },
       edges: [
-        { node: { id: 'node6' }, cursor: new Cursor({ id: 'node6' }).encode() },
-        { node: { id: 'node7' }, cursor: new Cursor({ id: 'node7' }).encode() },
-        { node: { id: 'node8' }, cursor: new Cursor({ id: 'node8' }).encode() },
-        { node: { id: 'node9' }, cursor: new Cursor({ id: 'node9' }).encode() },
-        { node: { id: 'node10' }, cursor: new Cursor({ id: 'node10' }).encode() },
+        { node: { id: 'node6', name: 'F' }, cursor: new Cursor({ id: 'node6' }).encode() },
+        { node: { id: 'node7', name: 'G' }, cursor: new Cursor({ id: 'node7' }).encode() },
+        { node: { id: 'node8', name: 'H' }, cursor: new Cursor({ id: 'node8' }).encode() },
+        { node: { id: 'node9', name: 'I' }, cursor: new Cursor({ id: 'node9' }).encode() },
+        { node: { id: 'node10', name: 'J' }, cursor: new Cursor({ id: 'node10' }).encode() },
       ],
     });
   });
@@ -128,7 +143,10 @@ describe('ConnectionBuilder', () => {
 
     const connection = builder.build({
       totalEdges: 12,
-      nodes: [{ id: 'node11' }, { id: 'node12' }],
+      nodes: [
+        { id: 'node11', name: 'K' },
+        { id: 'node12', name: 'L' },
+      ],
       hasNextPage: false, // must be set explicitly when using Cursor pagination
     });
 
@@ -141,8 +159,8 @@ describe('ConnectionBuilder', () => {
         endCursor: new Cursor({ id: 'node12' }).encode(),
       },
       edges: [
-        { node: { id: 'node11' }, cursor: new Cursor({ id: 'node11' }).encode() },
-        { node: { id: 'node12' }, cursor: new Cursor({ id: 'node12' }).encode() },
+        { node: { id: 'node11', name: 'K' }, cursor: new Cursor({ id: 'node11' }).encode() },
+        { node: { id: 'node12', name: 'L' }, cursor: new Cursor({ id: 'node12' }).encode() },
       ],
     });
   });
@@ -179,9 +197,19 @@ describe('ConnectionBuilder', () => {
     });
     const connection = builder.build({
       totalEdges: 12,
-      nodes: [{ id: 'node1' }, { id: 'node2' }, { id: 'node3' }, { id: 'node4' }, { id: 'node5' }],
-      createConnection: ({ edges, pageInfo }) => new TestConnection({ edges, pageInfo, customConnectionField: 99 }),
-      createEdge: ({ node, cursor }) => new TestEdge({ node, cursor, customEdgeField: 99 }),
+      nodes: [
+        { id: 'node1', name: 'A' },
+        { id: 'node2', name: 'B' },
+        { id: 'node3', name: 'C' },
+        { id: 'node4', name: 'D' },
+        { id: 'node5', name: 'E' },
+      ],
+      createConnection({ edges, pageInfo }) {
+        return new TestConnection({ edges, pageInfo, customConnectionField: 99 });
+      },
+      createEdge({ node, cursor }) {
+        return new TestEdge({ node, cursor, customEdgeField: 99 });
+      },
     });
 
     expect(connection).toMatchObject({
@@ -193,13 +221,54 @@ describe('ConnectionBuilder', () => {
         endCursor: new Cursor({ id: 'node5' }).encode(),
       },
       edges: [
-        { node: { id: 'node1' }, cursor: new Cursor({ id: 'node1' }).encode(), customEdgeField: 99 },
-        { node: { id: 'node2' }, cursor: new Cursor({ id: 'node2' }).encode(), customEdgeField: 99 },
-        { node: { id: 'node3' }, cursor: new Cursor({ id: 'node3' }).encode(), customEdgeField: 99 },
-        { node: { id: 'node4' }, cursor: new Cursor({ id: 'node4' }).encode(), customEdgeField: 99 },
-        { node: { id: 'node5' }, cursor: new Cursor({ id: 'node5' }).encode(), customEdgeField: 99 },
+        { node: { id: 'node1', name: 'A' }, cursor: new Cursor({ id: 'node1' }).encode(), customEdgeField: 99 },
+        { node: { id: 'node2', name: 'B' }, cursor: new Cursor({ id: 'node2' }).encode(), customEdgeField: 99 },
+        { node: { id: 'node3', name: 'C' }, cursor: new Cursor({ id: 'node3' }).encode(), customEdgeField: 99 },
+        { node: { id: 'node4', name: 'D' }, cursor: new Cursor({ id: 'node4' }).encode(), customEdgeField: 99 },
+        { node: { id: 'node5', name: 'E' }, cursor: new Cursor({ id: 'node5' }).encode(), customEdgeField: 99 },
       ],
       customConnectionField: 99,
+    });
+  });
+
+  test('Can override createCursor using connectionArgs when building Connection', () => {
+    const builder = new TestConnectionBuilder({
+      first: 5,
+      sortOption: 'name',
+    });
+    const connection = builder.build({
+      totalEdges: 12,
+      nodes: [
+        { id: 'node1', name: 'A' },
+        { id: 'node2', name: 'B' },
+        { id: 'node3', name: 'C' },
+        { id: 'node4', name: 'D' },
+        { id: 'node5', name: 'E' },
+      ],
+      createCursor(this: TestConnectionBuilder, node) {
+        if (this.connectionArgs.sortOption === 'name') {
+          return new Cursor({ name: node.name });
+        }
+
+        return new Cursor({ id: node.id });
+      },
+    });
+
+    expect(connection).toMatchObject({
+      pageInfo: {
+        totalEdges: 12,
+        hasNextPage: true,
+        hasPreviousPage: false,
+        startCursor: new Cursor({ name: 'A' }).encode(),
+        endCursor: new Cursor({ name: 'E' }).encode(),
+      },
+      edges: [
+        { node: { id: 'node1', name: 'A' }, cursor: new Cursor({ name: 'A' }).encode() },
+        { node: { id: 'node2', name: 'B' }, cursor: new Cursor({ name: 'B' }).encode() },
+        { node: { id: 'node3', name: 'C' }, cursor: new Cursor({ name: 'C' }).encode() },
+        { node: { id: 'node4', name: 'D' }, cursor: new Cursor({ name: 'D' }).encode() },
+        { node: { id: 'node5', name: 'E' }, cursor: new Cursor({ name: 'E' }).encode() },
+      ],
     });
   });
 });
