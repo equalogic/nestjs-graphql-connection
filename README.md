@@ -22,8 +22,7 @@ import { createEdgeType } from 'nestjs-graphql-connection';
 import { Person } from './entities';
 
 @ObjectType()
-export class PersonEdge extends createEdgeType(Person) {
-}
+export class PersonEdge extends createEdgeType(Person) {}
 ```
 
 ### Create a Connection type
@@ -36,8 +35,7 @@ import { ObjectType } from '@nestjs/graphql';
 import { createConnectionType } from 'nestjs-graphql-connection';
 
 @ObjectType()
-export class PersonConnection extends createConnectionType(PersonEdge) {
-}
+export class PersonConnection extends createConnectionType(PersonEdge) {}
 ```
 
 ### Create a Connection Arguments type
@@ -72,7 +70,13 @@ import { ConnectionBuilder, Cursor, PageInfo, validateParamsUsingSchema } from '
 export type PersonCursorParams = { id: string };
 export type PersonCursor = Cursor<PersonCursorParams>;
 
-export class PersonConnectionBuilder extends ConnectionBuilder<PersonConnection, PersonConnectionArgs, PersonEdge, Person, PersonCursor> {
+export class PersonConnectionBuilder extends ConnectionBuilder<
+  PersonConnection,
+  PersonConnectionArgs,
+  PersonEdge,
+  Person,
+  PersonCursor
+> {
   public createConnection(fields: { edges: PersonEdge[]; pageInfo: PageInfo }): PersonConnection {
     return new PersonConnection(fields);
   }
@@ -147,13 +151,14 @@ determining what the last result was on page 9.
 To use offset cursors, extend your builder class from `OffsetPaginatedConnectionBuilder` instead of `ConnectionBuilder`:
 
 ```ts
-import {
-  OffsetPaginatedConnectionBuilder,
-  PageInfo,
-  validateParamsUsingSchema
-} from 'nestjs-graphql-connection';
+import { OffsetPaginatedConnectionBuilder, PageInfo, validateParamsUsingSchema } from 'nestjs-graphql-connection';
 
-export class PersonConnectionBuilder extends OffsetPaginatedConnectionBuilder<PersonConnection, PersonConnectionArgs, PersonEdge, Person> {
+export class PersonConnectionBuilder extends OffsetPaginatedConnectionBuilder<
+  PersonConnection,
+  PersonConnectionArgs,
+  PersonEdge,
+  Person
+> {
   public createConnection(fields: { edges: PersonEdge[]; pageInfo: PageInfo }): PersonConnection {
     return new PersonConnection(fields);
   }
@@ -190,7 +195,7 @@ export class PersonQueryResolver {
     const persons = await fetchPersons({
       where: { personId },
       take: connectionBuilder.edgesPerPage, // how many rows to fetch
-      skip: connectionBuilder.startOffset,  // row offset to start at
+      skip: connectionBuilder.startOffset, // row offset to start at
     });
 
     // Return resolved PersonConnection with edges and pageInfo
@@ -267,7 +272,7 @@ export class PersonResolver {
         const friend = friends.find(friend => friend.otherPerson.id === node.id);
 
         return new PersonFriendEdge({ node, cursor, createdAt: friend.createdAt });
-      }
+      },
     });
   }
 }
@@ -278,11 +283,14 @@ with something like the following:
 
 ```ts
 // Resolve edges with cursor, node, and additional metadata
-const edges = friends.map((friend, index) => new PersonFriendEdge({
-  cursor: connectionBuilder.createCursor(friend.otherPerson, index),
-  node: friend.otherPerson,
-  createdAt: friend.createdAt,
-}));
+const edges = friends.map(
+  (friend, index) =>
+    new PersonFriendEdge({
+      cursor: connectionBuilder.createCursor(friend.otherPerson, index),
+      node: friend.otherPerson,
+      createdAt: friend.createdAt,
+    }),
+);
 
 // Return resolved PersonFriendConnection
 return new PersonFriendConnection({
@@ -322,7 +330,13 @@ You can customise your cursor based on the `sortOption` from the `ConnectionArgs
 `createCursor` and `decodeCursor` in your builder class like the following example:
 
 ```ts
-export class PersonConnectionBuilder extends ConnectionBuilder<PersonConnection, PersonConnectionArgs, PersonEdge, Person, PersonCursor> {
+export class PersonConnectionBuilder extends ConnectionBuilder<
+  PersonConnection,
+  PersonConnectionArgs,
+  PersonEdge,
+  Person,
+  PersonCursor
+> {
   // ... (methods createConnection and createEdge remain unchanged)
 
   public createCursor(node: Person): PersonCursor {
@@ -335,19 +349,23 @@ export class PersonConnectionBuilder extends ConnectionBuilder<PersonConnection,
 
   public decodeCursor(encodedString: string): PersonCursor {
     if (this.connectionArgs.sortOption === 'name') {
-      return Cursor.fromString(encodedString, params => validateParamsUsingSchema(
-        params,
-        Joi.object({
-          name: Joi.string().empty('').required(),
-        }).unknown(false))
+      return Cursor.fromString(encodedString, params =>
+        validateParamsUsingSchema(
+          params,
+          Joi.object({
+            name: Joi.string().empty('').required(),
+          }).unknown(false),
+        ),
       );
     }
 
-    return Cursor.fromString(encodedString, params => validateParamsUsingSchema(
-      params,
-      Joi.object({
-        id: Joi.string().empty('').required(),
-      }).unknown(false))
+    return Cursor.fromString(encodedString, params =>
+      validateParamsUsingSchema(
+        params,
+        Joi.object({
+          id: Joi.string().empty('').required(),
+        }).unknown(false),
+      ),
     );
   }
 }
@@ -380,8 +398,8 @@ export class PersonQueryResolver {
       totalEdges: await countPersons(),
       nodes: persons,
       createCursor(node) {
-        return new Cursor(sortOption === 'name' ? { name: node.name } : { createdAt: node.createdAt.toISOString() })
-      }
+        return new Cursor(sortOption === 'name' ? { name: node.name } : { createdAt: node.createdAt.toISOString() });
+      },
     });
   }
 }
