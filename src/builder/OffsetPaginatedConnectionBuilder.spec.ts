@@ -1,5 +1,5 @@
 import { Cursor } from '../cursor/Cursor';
-import { createConnectionType, createEdgeType, PageInfo } from '../type';
+import { ConnectionArgs, createConnectionType, createEdgeType, PageInfo } from '../type';
 import { OffsetPaginatedConnectionBuilder } from './OffsetPaginatedConnectionBuilder';
 
 class TestNode {
@@ -10,7 +10,14 @@ class TestEdge extends createEdgeType(TestNode) {}
 
 class TestConnection extends createConnectionType(TestEdge) {}
 
-class TestConnectionBuilder extends OffsetPaginatedConnectionBuilder<TestConnection, TestEdge, TestNode> {
+class TestConnectionArgs extends ConnectionArgs {}
+
+class TestConnectionBuilder extends OffsetPaginatedConnectionBuilder<
+  TestConnection,
+  TestConnectionArgs,
+  TestEdge,
+  TestNode
+> {
   public createConnection(fields: { edges: TestEdge[]; pageInfo: PageInfo }): TestConnection {
     return new TestConnection(fields);
   }

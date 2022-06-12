@@ -5,9 +5,10 @@ import { ConnectionBuilder, ConnectionBuilderOptions } from './ConnectionBuilder
 
 export abstract class OffsetPaginatedConnectionBuilder<
   TConnection extends ConnectionInterface<TEdge>,
+  TConnectionArgs extends ConnectionArgs,
   TEdge extends EdgeInterface<TNode>,
   TNode,
-> extends ConnectionBuilder<TConnection, TEdge, TNode, OffsetCursor> {
+> extends ConnectionBuilder<TConnection, TConnectionArgs, TEdge, TNode, OffsetCursor> {
   public startOffset: number;
 
   public createCursor(node: TNode, index: number): OffsetCursor {

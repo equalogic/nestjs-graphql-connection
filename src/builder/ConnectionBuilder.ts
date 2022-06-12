@@ -10,15 +10,19 @@ export interface ConnectionBuilderOptions {
 
 export abstract class ConnectionBuilder<
   TConnection extends ConnectionInterface<TEdge>,
+  TConnectionArgs extends ConnectionArgs,
   TEdge extends EdgeInterface<TNode>,
   TNode,
   TCursor extends Cursor = Cursor,
 > {
+  public connectionArgs: TConnectionArgs;
   public edgesPerPage: number = 20;
   public beforeCursor?: TCursor;
   public afterCursor?: TCursor;
 
-  public constructor(connectionArgs: ConnectionArgs, options: ConnectionBuilderOptions = {}) {
+  public constructor(connectionArgs: TConnectionArgs, options: ConnectionBuilderOptions = {}) {
+    this.connectionArgs = connectionArgs;
+
     this.applyConnectionArgs(connectionArgs, options);
   }
 

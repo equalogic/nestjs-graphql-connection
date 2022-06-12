@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import { Cursor } from '../cursor/Cursor';
 import { validateParamsUsingSchema } from '../cursor/validateParamsUsingSchema';
-import { createConnectionType, createEdgeType, PageInfo } from '../type';
+import { ConnectionArgs, createConnectionType, createEdgeType, PageInfo } from '../type';
 import { ConnectionBuilder } from './ConnectionBuilder';
 
 class TestNode {
@@ -16,11 +16,19 @@ class TestConnection extends createConnectionType<{ customConnectionField?: numb
   public customConnectionField?: number;
 }
 
+class TestConnectionArgs extends ConnectionArgs {}
+
 type TestCursorParams = { id: string };
 
 type TestCursor = Cursor<TestCursorParams>;
 
-class TestConnectionBuilder extends ConnectionBuilder<TestConnection, TestEdge, TestNode, TestCursor> {
+class TestConnectionBuilder extends ConnectionBuilder<
+  TestConnection,
+  TestConnectionArgs,
+  TestEdge,
+  TestNode,
+  TestCursor
+> {
   public createConnection(fields: { edges: TestEdge[]; pageInfo: PageInfo }): TestConnection {
     return new TestConnection(fields);
   }

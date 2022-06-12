@@ -72,7 +72,7 @@ import { ConnectionBuilder, Cursor, PageInfo, validateParamsUsingSchema } from '
 export type PersonCursorParams = { id: string };
 export type PersonCursor = Cursor<PersonCursorParams>;
 
-export class PersonConnectionBuilder extends ConnectionBuilder<PersonConnection, PersonEdge, Person, PersonCursor> {
+export class PersonConnectionBuilder extends ConnectionBuilder<PersonConnection, PersonConnectionArgs, PersonEdge, Person, PersonCursor> {
   public createConnection(fields: { edges: PersonEdge[]; pageInfo: PageInfo }): PersonConnection {
     return new PersonConnection(fields);
   }
@@ -153,7 +153,7 @@ import {
   validateParamsUsingSchema
 } from 'nestjs-graphql-connection';
 
-export class PersonConnectionBuilder extends OffsetPaginatedConnectionBuilder<PersonConnection, PersonEdge, Person> {
+export class PersonConnectionBuilder extends OffsetPaginatedConnectionBuilder<PersonConnection, PersonConnectionArgs, PersonEdge, Person> {
   public createConnection(fields: { edges: PersonEdge[]; pageInfo: PageInfo }): PersonConnection {
     return new PersonConnection(fields);
   }
