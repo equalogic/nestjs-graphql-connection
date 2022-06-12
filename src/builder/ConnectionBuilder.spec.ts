@@ -8,12 +8,12 @@ class TestNode {
   id: string;
 }
 
-class TestEdge extends createEdgeType(TestNode) {
-  customEdgeField?: number;
+class TestEdge extends createEdgeType<{ customEdgeField?: number }>(TestNode) {
+  public customEdgeField?: number;
 }
 
 class TestConnection extends createConnectionType(TestEdge) {
-  customConnectionField?: number;
+  public customConnectionField?: number;
 }
 
 type TestCursorParams = { id: string };
@@ -178,12 +178,7 @@ describe('ConnectionBuilder', () => {
 
         return connection;
       },
-      createEdge: ({ node, cursor }) => {
-        const edge = new TestEdge({ node, cursor });
-        edge.customEdgeField = 99;
-
-        return edge;
-      },
+      createEdge: ({ node, cursor }) => new TestEdge({ node, cursor, customEdgeField: 99 }),
     });
 
     expect(connection).toMatchObject({
