@@ -61,9 +61,9 @@ export abstract class ConnectionBuilder<
     totalEdges,
     hasNextPage,
     hasPreviousPage,
-    createConnection = this.createConnection.bind(this),
-    createEdge = this.createEdge.bind(this),
-    createCursor = this.createCursor.bind(this),
+    createConnection = this.createConnection,
+    createEdge = this.createEdge,
+    createCursor = this.createCursor,
   }: {
     nodes: TNode[];
     totalEdges?: number;
@@ -74,13 +74,13 @@ export abstract class ConnectionBuilder<
     createCursor?: (node: TNode, index: number) => TCursor;
   }): TConnection {
     const edges = nodes.map((node, index) =>
-      createEdge({
+      createEdge.bind(this)({
         node,
-        cursor: createCursor(node, index).encode(),
+        cursor: createCursor.bind(this)(node, index).encode(),
       }),
     );
 
-    return createConnection({
+    return createConnection.bind(this)({
       edges,
       pageInfo: this.createPageInfo({
         edges,
