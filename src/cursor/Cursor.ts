@@ -1,10 +1,25 @@
-import Joi from 'joi';
 import queryString, { StringifiableRecord } from 'query-string';
+
+export function decodeCursorString(encodedString: string): queryString.ParsedQuery {
+  // opaque cursors are base64 encoded, decode it first
+  const decodedString = Buffer.from(encodedString, 'base64').toString();
+
+  // cursor string is URL encoded, parse it into a map of parameters
+  return queryString.parse(decodedString);
+}
 
 export type CursorParameters = StringifiableRecord;
 
-export class Cursor<P = CursorParameters> {
-  constructor(public readonly parameters: P) {}
+export interface CursorInterface<TParams extends CursorParameters = CursorParameters> {
+  parameters: TParams;
+
+  toString(): string;
+
+  encode(): string;
+}
+
+export class Cursor<TParams extends CursorParameters = CursorParameters> implements CursorInterface<TParams> {
+  constructor(public readonly parameters: TParams) {}
 
   public toString(): string {
     return queryString.stringify(this.parameters);
@@ -15,23 +30,18 @@ export class Cursor<P = CursorParameters> {
   }
 
   public static decode(encodedString: string): queryString.ParsedQuery {
-    // opaque cursors are base64 encoded, decode it first
-    const decodedString = Buffer.from(encodedString, 'base64').toString();
-
-    // cursor string is URL encoded, parse it into a map of parameters
-    return queryString.parse(decodedString);
+    return decodeCursorString(encodedString);
   }
 
-  public static create(encodedString: string, schema: Joi.ObjectSchema): Cursor {
+  public static fromString<TParams extends CursorParameters = CursorParameters>(
+    encodedString: string,
+    validateParams?: (params: unknown) => TParams,
+  ): Cursor<TParams> {
     const parameters = Cursor.decode(encodedString);
 
-    // validate the cursor parameters match the schema we expect, this also converts data types
-    const { error, value: validatedParameters } = schema.validate(parameters);
+    // run the cursor parameters through the validation function, if we have one
+    const validatedParameters = validateParams != null ? validateParams(parameters) : (parameters as TParams);
 
-    if (error != null) {
-      throw error;
-    }
-
-    return new Cursor(validatedParameters);
+    return new Cursor<TParams>(validatedParameters);
   }
 }

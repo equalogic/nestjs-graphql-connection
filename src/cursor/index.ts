@@ -3,4 +3,5 @@
  */
 
 export * from './Cursor';
-export * from './OffsetCursorPaginator';
+export * from './OffsetCursor';
+export * from './validateParamsUsingSchema';

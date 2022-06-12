@@ -1,8 +1,7 @@
-import * as Relay from 'graphql-relay';
 import * as GQL from '@nestjs/graphql';
 
 @GQL.ObjectType()
-export class PageInfo implements Relay.PageInfo {
+export class PageInfo {
   @GQL.Field(_type => Boolean)
   public hasNextPage!: boolean;
 
