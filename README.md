@@ -202,6 +202,8 @@ export class PersonQueryResolver {
 }
 ```
 
+## Advanced Topics
+
 ### Enriching Edges with additional metadata
 
 The previous examples are sufficient for resolving connections that represent simple lists of objects with pagination.
@@ -292,6 +294,97 @@ return new PersonFriendConnection({
   }),
   edges,
 });
+```
+
+### Customising Cursors
+
+When using cursors for pagination of connections that allow the client to choose from different sorting options, you may
+need to customise your cursor to reflect the chosen sort order. For example, if the client can sort `PersonConnection`
+by either name or creation date, the cursors you create on each edge will need to be different. It is no use knowing the
+creation date of the last node if you are trying to fetch the next page of edges after the name "Smith", and vice versa.
+
+You _could_ set the node ID as the cursor in all cases and simply look up the relevant data (name or creation date) from
+the node when given such a cursor. However, if you have a dataset that could change between requests then this approach
+introduces the potential for odd behavior and/or missing results.
+
+Imagine you have a `sortOption` field on your `PersonConnectionArgs` that determines the requested sort order:
+
+```ts
+@ArgsType()
+export class PersonConnectionArgs extends ConnectionArgs {
+  // In reality you might want an enum here, but we'll use a string for simplicity
+  @Field(type => String, { nullable: true })
+  public sortOption?: string;
+}
+```
+
+You can customise your cursor based on the `sortOption` from the `ConnectionArgs` by changing your definition of
+`createCursor` and `decodeCursor` in your builder class like the following example:
+
+```ts
+export class PersonConnectionBuilder extends ConnectionBuilder<PersonConnection, PersonConnectionArgs, PersonEdge, Person, PersonCursor> {
+  // ... (methods createConnection and createEdge remain unchanged)
+
+  public createCursor(node: Person): PersonCursor {
+    if (this.connectionArgs.sortOption === 'name') {
+      return new Cursor({ name: node.name });
+    }
+
+    return new Cursor({ createdAt: node.createdAt.toISOString() });
+  }
+
+  public decodeCursor(encodedString: string): PersonCursor {
+    if (this.connectionArgs.sortOption === 'name') {
+      return Cursor.fromString(encodedString, params => validateParamsUsingSchema(
+        params,
+        Joi.object({
+          name: Joi.string().empty('').required(),
+        }).unknown(false))
+      );
+    }
+
+    return Cursor.fromString(encodedString, params => validateParamsUsingSchema(
+      params,
+      Joi.object({
+        id: Joi.string().empty('').required(),
+      }).unknown(false))
+    );
+  }
+}
+```
+
+Alternatively, `ConnectionBuilder` supports overriding the `createCursor()` method when calling `build()`. So you could
+also do it like this:
+
+```ts
+import { Args, ResolveField, Resolver, Root } from '@nestjs/graphql';
+
+@Resolver()
+export class PersonQueryResolver {
+  @Query(returns => PersonConnection)
+  public async persons(@Args() connectionArgs: PersonConnectionArgs): Promise<PersonConnection> {
+    const { sortOption } = connectionArgs;
+
+    // Create builder instance
+    const connectionBuilder = new PersonConnectionBuilder(connectionArgs);
+
+    // EXAMPLE: Do whatever you need to do to fetch the current page of persons using the specified sort order
+    const persons = await fetchPersons({
+      where: { personId },
+      order: sortOption === 'name' ? { name: 'ASC' } : { createdAt: 'ASC' },
+      take: connectionBuilder.edgesPerPage, // how many rows to fetch
+    });
+
+    // Return resolved PersonConnection with edges and pageInfo
+    return connectionBuilder.build({
+      totalEdges: await countPersons(),
+      nodes: persons,
+      createCursor(node) {
+        return new Cursor(sortOption === 'name' ? { name: node.name } : { createdAt: node.createdAt.toISOString() })
+      }
+    });
+  }
+}
 ```
 
 ## License
