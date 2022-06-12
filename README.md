@@ -15,15 +15,14 @@ npm i nestjs-graphql-connection
 ### Create an Edge type
 
 Extend a class from `createEdgeType` function, passing it the class of objects to be represented by the edge's `node`.
-For correct typings also indicate that your class implements `EdgeInterface`, as shown:
 
 ```ts
 import { ObjectType } from '@nestjs/graphql';
-import { createEdgeType, EdgeInterface } from 'nestjs-graphql-connection';
+import { createEdgeType } from 'nestjs-graphql-connection';
 import { Person } from './entities';
 
 @ObjectType()
-export class PersonEdge extends createEdgeType(Person) implements EdgeInterface<Person> {
+export class PersonEdge extends createEdgeType(Person) {
 }
 ```
 
@@ -213,9 +212,24 @@ properties -- such as the date that the friend was added, or the type of relatio
 this is analogous to having a Many-to-Many relation where the intermediate join table contains additional data columns
 beyond just the keys of the two joined tables.)
 
-`ConnectionBuilder` supports this use case by enabling the `createConnection()` and `createEdge()` methods to be
-overridden when calling `build()`. This allows you to enrich the connection and edges with data that is only available
-at resolve time.
+In this case your edge type would look like the following example. Notice that we pass a `{ createdAt: Date }` type
+argument to `createEdgeType`; this specifies typings for the fields that are allowed to be passed to your edge class's
+constructor for initialization when doing `new PersonFriendEdge({ ...fields })`.
+
+```ts
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
+import { createEdgeType } from 'nestjs-graphql-connection';
+import { Person } from './entities';
+
+@ObjectType()
+export class PersonFriendEdge extends createEdgeType<{ createdAt: Date }>(Person) {
+  @Field(type => GraphQLISODateTime)
+  public createdAt: Date;
+}
+```
+
+`ConnectionBuilder` supports overriding the `createConnection()` and `createEdge()` methods when calling `build()`. This
+enables you to enrich the connection and edges with additional metadata at resolve time.
 
 The following example assumes you have a GraphQL schema that defines a `friends` field on your `Person` object, which
 resolves to a `PersonFriendConnection` containing the person's friends. In your database you would have a `friend` table
@@ -250,10 +264,7 @@ export class PersonResolver {
       createEdge: ({ node, cursor }) => {
         const friend = friends.find(friend => friend.otherPerson.id === node.id);
 
-        const edge = new PersonFriendEdge({ node, cursor });
-        edge.createdAt = friend.createdAt;
-
-        return edge;
+        return new PersonFriendEdge({ node, cursor, createdAt: friend.createdAt });
       }
     });
   }
@@ -265,15 +276,11 @@ with something like the following:
 
 ```ts
 // Resolve edges with cursor, node, and additional metadata
-const edges = friends.map((friend, index) => {
-  const edge = new PersonFriendEdge({
-    cursor: connectionBuilder.createCursor(friend.otherPerson, index),
-    node: friend.otherPerson,
-  });
-  edge.createdAt = friend.createdAt;
-
-  return edge;
-});
+const edges = friends.map((friend, index) => new PersonFriendEdge({
+  cursor: connectionBuilder.createCursor(friend.otherPerson, index),
+  node: friend.otherPerson,
+  createdAt: friend.createdAt,
+}));
 
 // Return resolved PersonFriendConnection
 return new PersonFriendConnection({
