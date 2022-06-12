@@ -9,7 +9,7 @@ export interface ConnectionBuilderOptions {
 }
 
 export abstract class ConnectionBuilder<
-  TConnection extends ConnectionInterface<TNode>,
+  TConnection extends ConnectionInterface<TEdge>,
   TEdge extends EdgeInterface<TNode>,
   TNode,
   TCursor extends Cursor = Cursor,

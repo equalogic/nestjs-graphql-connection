@@ -4,7 +4,7 @@ import { ConnectionArgs, ConnectionInterface, EdgeInterface, PageInfo } from '..
 import { ConnectionBuilder, ConnectionBuilderOptions } from './ConnectionBuilder';
 
 export abstract class OffsetPaginatedConnectionBuilder<
-  TConnection extends ConnectionInterface<TNode>,
+  TConnection extends ConnectionInterface<TEdge>,
   TEdge extends EdgeInterface<TNode>,
   TNode,
 > extends ConnectionBuilder<TConnection, TEdge, TNode, OffsetCursor> {
