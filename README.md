@@ -59,7 +59,7 @@ export class PersonConnectionArgs extends ConnectionArgs {
 }
 ```
 
-### Create a Connection Builder and resolve a Connection
+### Create a Connection Builder
 
 Now define a `ConnectionBuilder` class for your `Connection` object. The builder is responsible for interpreting
 pagination arguments for the connection, and creating the cursors and `Edge` objects that make up the connection.
@@ -104,6 +104,8 @@ export class PersonConnectionBuilder extends ConnectionBuilder<
 }
 ```
 
+### Resolve a Connection
+
 Your resolvers can now return your `Connection` as an object type. Use your `ConnectionBuilder` class to determine which
 page of results to fetch and to create the `PageInfo`, cursors, and edges in the result.
 
@@ -137,7 +139,7 @@ export class PersonQueryResolver {
 }
 ```
 
-### Using Offset Pagination
+## Using Offset Pagination
 
 With offset pagination, cursor values are an encoded representation of the row offset. It is possible for clients to
 paginate by specifying either an `after` argument with the cursor of the last row on the previous page, or to pass a
