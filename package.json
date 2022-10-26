@@ -31,8 +31,8 @@
     "ts-class-initializable": "1.0.2"
   },
   "devDependencies": {
-    "@nestjs/common": "9.1.4",
-    "@nestjs/core": "9.1.4",
+    "@nestjs/common": "9.1.5",
+    "@nestjs/core": "9.1.5",
     "@nestjs/graphql": "10.1.3",
     "@types/jest": "29.2.0",
     "@types/node": "16.11.68",
