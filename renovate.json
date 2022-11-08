@@ -13,32 +13,20 @@
   "stabilityDays": 3,
   "rebaseWhen": "conflicted",
   "lockFileMaintenance": true,
-  "labels": [
-    "dependencies"
-  ],
+  "labels": ["dependencies"],
   "reviewers": [],
   "packageRules": [
     {
-      "packagePatterns": [
-        "eslint"
-      ],
+      "packagePatterns": ["eslint"],
       "groupName": "eslint"
     },
     {
-      "packagePatterns": [
-        "jest"
-      ],
+      "packagePatterns": ["jest"],
       "groupName": "jest"
     },
     {
-      "matchDatasources": [
-        "nvm",
-        "npm"
-      ],
-      "matchPackageNames": [
-        "node",
-        "@types/node"
-      ],
+      "matchDatasources": ["nvm", "npm"],
+      "matchPackageNames": ["node", "@types/node"],
       "groupName": "Node.js",
       "allowedVersions": "^16"
     }
