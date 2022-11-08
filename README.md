@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/equalogic/nestjs-graphql-connection/raw/master/resources/logo@720w.png" width="720" height="546">
+  <img src="https://github.com/equalogic/nestjs-graphql-connection/raw/master/resources/logo@720w.png" width="480" height="364">
   <br>
   <br>
   <a href="https://npmjs.com/package/nestjs-graphql-connection">
