@@ -2,7 +2,7 @@ name: Publish
 
 on:
   release:
-    types: [created]
+    types: [ created ]
   workflow_dispatch:
 
 jobs:
@@ -14,29 +14,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 16.x
+      - name: Setup Node.js and NPM
         uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version-file: .nvmrc
+          cache: npm
           always-auth: true
           registry-url: https://registry.npmjs.org
       # Dependencies
-      - id: cache_npm
-        name: Cache Node.js modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.npm
-            ./node_modules.tar.zstd
-          key: ${{ runner.OS }}-node16.x-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.OS }}-node16.x-
       - name: Install dependencies with NPM
-        if: steps.cache_npm.outputs.cache-hit != 'true'
         run: npm ci
-      - name: Unarchive node_modules
-        if: steps.cache_npm.outputs.cache-hit == 'true'
-        run: tar --use-compress-program "zstd -d --long=31" -xf node_modules.tar.zstd
       # Build
       - name: Build application
         run: npm run build

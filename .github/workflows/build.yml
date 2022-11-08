@@ -1,6 +1,6 @@
 name: Build
 
-on: [push]
+on: [ push ]
 
 jobs:
   #
@@ -11,27 +11,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 16.x
+      - name: Setup Node.js and NPM
         uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version-file: .nvmrc
+          cache: npm
           always-auth: true
           registry-url: https://registry.npmjs.org
-      - id: cache_npm
-        name: Cache Node.js modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.npm
-            ./node_modules.tar.zstd
-          key: ${{ runner.OS }}-node16.x-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.OS }}-node16.x-
       - name: Install dependencies with NPM
-        if: steps.cache_npm.outputs.cache-hit != 'true'
         run: npm ci
       - name: Archive node_modules
-        if: steps.cache_npm.outputs.cache-hit != 'true'
         run: tar --use-compress-program "zstd -T0 --long=31 -1" -cf node_modules.tar.zstd -P node_modules
       - name: Persisting node_modules artifact
         uses: actions/upload-artifact@v3
@@ -45,17 +34,18 @@ jobs:
   #
   lint:
     runs-on: ubuntu-latest
-    needs: [dependencies]
+    needs: [ dependencies ]
 
     steps:
       # Setup
       - uses: actions/checkout@v3
         with:
           token: ${{ secrets.BUILD_USER_TOKEN || github.token }} # allows commit of any fixes to trigger a new workflow run
-      - name: Use Node.js 16.x
+      - name: Setup Node.js and NPM
         uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version-file: .nvmrc
+          cache: npm
           always-auth: true
           registry-url: https://registry.npmjs.org
       - name: Restore node_modules artifact
@@ -81,15 +71,16 @@ jobs:
   #
   build:
     runs-on: ubuntu-latest
-    needs: [dependencies]
+    needs: [ dependencies ]
 
     steps:
       # Setup
       - uses: actions/checkout@v3
-      - name: Use Node.js 16.x
+      - name: Setup Node.js and NPM
         uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version-file: .nvmrc
+          cache: npm
           always-auth: true
           registry-url: https://registry.npmjs.org
       - name: Restore node_modules artifact
@@ -117,15 +108,16 @@ jobs:
   #
   test:
     runs-on: ubuntu-latest
-    needs: [dependencies]
+    needs: [ dependencies ]
 
     steps:
       # Setup
       - uses: actions/checkout@v3
-      - name: Use Node.js 16.x
+      - name: Setup Node.js and NPM
         uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version-file: .nvmrc
+          cache: npm
           always-auth: true
           registry-url: https://registry.npmjs.org
       - name: Restore node_modules artifact
