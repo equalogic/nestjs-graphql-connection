@@ -1,4 +1,16 @@
-# nestjs-graphql-connection 🐈‍ ⚛️ 🔗
+<div align="center">
+  <img src="https://github.com/equalogic/nestjs-graphql-connection/raw/master/resources/logo@720w.png" width="720" height="546">
+  <br>
+  <br>
+  <a href="https://npmjs.com/package/nestjs-graphql-connection">
+    <img src="https://img.shields.io/npm/v/nestjs-graphql-connection">
+  </a>
+  <a href="https://npmjs.com/package/nestjs-graphql-connection">
+    <img src="https://img.shields.io/npm/dy/nestjs-graphql-connection">
+  </a>
+  <br>
+  <br>
+</div>
 
 [Relay-style pagination](https://relay.dev/graphql/connections.htm) for NestJS GraphQL server.
 
@@ -8,7 +20,10 @@
 npm i nestjs-graphql-connection
 ```
 
-[![npm version](https://badge.fury.io/js/nestjs-graphql-connection.svg)](https://badge.fury.io/js/nestjs-graphql-connection)
+TypeScript type definitions are included in the box.
+
+You must also install [@nestjs/graphql](https://github.com/nestjs/graphql) as a peer dependency (you should have this
+already).
 
 ## Usage
 
