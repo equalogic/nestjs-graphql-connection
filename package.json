@@ -42,7 +42,7 @@
   "devDependencies": {
     "@nestjs/common": "9.2.1",
     "@nestjs/core": "9.2.1",
-    "@nestjs/graphql": "10.1.6",
+    "@nestjs/graphql": "10.1.7",
     "@types/jest": "29.2.4",
     "@types/node": "16.18.6",
     "@typescript-eslint/eslint-plugin": "5.45.1",
