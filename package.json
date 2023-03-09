@@ -49,7 +49,7 @@
     "@typescript-eslint/parser": "5.54.0",
     "barrelsby": "2.5.1",
     "eslint": "8.35.0",
-    "eslint-config-prettier": "8.6.0",
+    "eslint-config-prettier": "8.7.0",
     "eslint-import-resolver-typescript": "3.5.3",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-node": "11.1.0",
