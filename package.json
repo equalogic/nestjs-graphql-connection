@@ -43,7 +43,7 @@
     "@nestjs/common": "10.2.10",
     "@nestjs/core": "10.2.10",
     "@nestjs/graphql": "12.0.11",
-    "@types/jest": "29.5.10",
+    "@types/jest": "29.5.11",
     "@types/node": "16.18.67",
     "@typescript-eslint/eslint-plugin": "6.13.2",
     "@typescript-eslint/parser": "6.13.2",
