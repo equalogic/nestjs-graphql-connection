@@ -23,7 +23,7 @@ jobs:
       - name: Archive node_modules
         run: tar --use-compress-program "zstd -T0 --long=31 -1" -cf node_modules.tar.zstd -P node_modules
       - name: Persisting node_modules artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: node_modules.tar.zstd
           path: node_modules.tar.zstd
