@@ -44,7 +44,7 @@
     "@nestjs/core": "10.4.4",
     "@nestjs/graphql": "12.2.0",
     "@types/jest": "29.5.13",
-    "@types/node": "16.18.111",
+    "@types/node": "16.18.112",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
     "barrelsby": "2.8.1",
