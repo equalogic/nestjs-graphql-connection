@@ -58,7 +58,7 @@
     "np": "8.0.4",
     "prettier": "3.5.2",
     "reflect-metadata": "0.2.2",
-    "ts-jest": "29.2.5",
+    "ts-jest": "29.2.6",
     "typescript": "5.7.3"
   },
   "peerDependencies": {
