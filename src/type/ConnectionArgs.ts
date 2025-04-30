@@ -1,12 +1,12 @@
-import * as GQL from '@nestjs/graphql';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import * as Validate from 'class-validator';
 
-@GQL.ArgsType()
+@ArgsType()
 export class ConnectionArgs {
   @Validate.IsInt()
   @Validate.Min(1)
   @Validate.IsOptional()
-  @GQL.Field(_type => GQL.Int, {
+  @Field(_type => Int, {
     nullable: true,
     description: 'Retrieve page of edges by fixed offset page number.',
   })
@@ -15,7 +15,7 @@ export class ConnectionArgs {
   @Validate.IsString()
   @Validate.MinLength(1)
   @Validate.IsOptional()
-  @GQL.Field(_type => String, {
+  @Field(_type => String, {
     nullable: true,
     description: 'Retrieve page of edges before opaque cursor.',
   })
@@ -24,7 +24,7 @@ export class ConnectionArgs {
   @Validate.IsString()
   @Validate.MinLength(1)
   @Validate.IsOptional()
-  @GQL.Field(_type => String, {
+  @Field(_type => String, {
     nullable: true,
     description: 'Retrieve page of edges after opaque cursor.',
   })
@@ -33,7 +33,7 @@ export class ConnectionArgs {
   @Validate.IsInt()
   @Validate.Min(1)
   @Validate.IsOptional()
-  @GQL.Field(_type => GQL.Int, {
+  @Field(_type => Int, {
     nullable: true,
     description: 'Retrieve first `n` edges.',
   })
@@ -42,7 +42,7 @@ export class ConnectionArgs {
   @Validate.IsInt()
   @Validate.Min(1)
   @Validate.IsOptional()
-  @GQL.Field(_type => GQL.Int, {
+  @Field(_type => Int, {
     nullable: true,
     description: 'Retrieve last `n` edges.',
   })
