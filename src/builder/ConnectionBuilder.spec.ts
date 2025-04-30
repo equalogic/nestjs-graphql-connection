@@ -1,79 +1,10 @@
-import Joi from 'joi';
 import { Cursor } from '../cursor/Cursor';
-import { validateParamsUsingSchema } from '../cursor/validateParamsUsingSchema';
-import {
-  ConnectionArgs,
-  ConnectionInterface,
-  createConnectionType,
-  createEdgeType,
-  EdgeInterface,
-  PageInfo,
-} from '../type';
-import { ConnectionBuilder, EdgeInputWithCursor } from './ConnectionBuilder';
-
-class TestNode {
-  id: string;
-  name: string;
-}
-
-interface TestEdgeInterface extends EdgeInterface<TestNode> {
-  customEdgeField?: number;
-}
-
-class TestEdge extends createEdgeType<TestEdgeInterface>(TestNode) implements TestEdgeInterface {
-  public customEdgeField?: number;
-}
-
-interface TestConnectionInterface extends ConnectionInterface<TestEdge> {
-  customConnectionField?: number;
-}
-
-class TestConnection
-  extends createConnectionType<TestConnectionInterface>(TestEdge)
-  implements TestConnectionInterface
-{
-  public customConnectionField?: number;
-}
-
-class TestConnectionArgs extends ConnectionArgs {
-  public sortOption?: string;
-}
-
-type TestCursorParams = { id?: string; name?: string };
-
-type TestCursor = Cursor<TestCursorParams>;
-
-class TestConnectionBuilder extends ConnectionBuilder<
-  TestConnection,
-  TestConnectionArgs,
-  TestEdge,
-  TestNode,
-  TestCursor
-> {
-  public createConnection(fields: { edges: TestEdge[]; pageInfo: PageInfo }): TestConnection {
-    return new TestConnection(fields);
-  }
-
-  public createEdge(fields: EdgeInputWithCursor<TestEdge>): TestEdge {
-    return new TestEdge(fields);
-  }
-
-  public createCursor(node: TestNode): TestCursor {
-    return new Cursor({ id: node.id });
-  }
-
-  public decodeCursor(encodedString: string): TestCursor {
-    const schema: Joi.ObjectSchema<TestCursorParams> = Joi.object({
-      id: Joi.string().empty('').required(),
-    }).unknown(false);
-
-    return Cursor.fromString(encodedString, params => validateParamsUsingSchema(params, schema));
-  }
-}
+import { Foo, FooConnection, FooConnectionBuilder, FooEdge } from '../../test/FooConnection';
+import { BarConnectionBuilder, FruitBar, NutBar } from '../../test/BarConnection';
 
 describe('ConnectionBuilder', () => {
   test('First page is built correctly', () => {
-    const builder = new TestConnectionBuilder({
+    const builder = new FooConnectionBuilder({
       first: 5,
     });
 
@@ -84,11 +15,11 @@ describe('ConnectionBuilder', () => {
     const connection = builder.build({
       totalEdges: 12,
       nodes: [
-        { id: 'node1', name: 'A' },
-        { id: 'node2', name: 'B' },
-        { id: 'node3', name: 'C' },
-        { id: 'node4', name: 'D' },
-        { id: 'node5', name: 'E' },
+        new Foo({ id: 'node1', name: 'A' }),
+        new Foo({ id: 'node2', name: 'B' }),
+        new Foo({ id: 'node3', name: 'C' }),
+        new Foo({ id: 'node4', name: 'D' }),
+        new Foo({ id: 'node5', name: 'E' }),
       ],
     });
 
@@ -111,7 +42,7 @@ describe('ConnectionBuilder', () => {
   });
 
   test('Second page is built correctly', () => {
-    const builder = new TestConnectionBuilder({
+    const builder = new FooConnectionBuilder({
       first: 5,
       after: new Cursor({ id: 'node5' }).encode(),
     });
@@ -123,11 +54,11 @@ describe('ConnectionBuilder', () => {
     const connection = builder.build({
       totalEdges: 12,
       nodes: [
-        { id: 'node6', name: 'F' },
-        { id: 'node7', name: 'G' },
-        { id: 'node8', name: 'H' },
-        { id: 'node9', name: 'I' },
-        { id: 'node10', name: 'J' },
+        new Foo({ id: 'node6', name: 'F' }),
+        new Foo({ id: 'node7', name: 'G' }),
+        new Foo({ id: 'node8', name: 'H' }),
+        new Foo({ id: 'node9', name: 'I' }),
+        new Foo({ id: 'node10', name: 'J' }),
       ],
     });
 
@@ -150,7 +81,7 @@ describe('ConnectionBuilder', () => {
   });
 
   test('Last page is built correctly', () => {
-    const builder = new TestConnectionBuilder({
+    const builder = new FooConnectionBuilder({
       first: 5,
       after: new Cursor({ id: 'node10' }).encode(),
     });
@@ -161,10 +92,7 @@ describe('ConnectionBuilder', () => {
 
     const connection = builder.build({
       totalEdges: 12,
-      nodes: [
-        { id: 'node11', name: 'K' },
-        { id: 'node12', name: 'L' },
-      ],
+      nodes: [new Foo({ id: 'node11', name: 'K' }), new Foo({ id: 'node12', name: 'L' })],
       hasNextPage: false, // must be set explicitly when using Cursor pagination
     });
 
@@ -184,7 +112,7 @@ describe('ConnectionBuilder', () => {
   });
 
   test('Empty result is built correctly', () => {
-    const builder = new TestConnectionBuilder({
+    const builder = new FooConnectionBuilder({
       first: 5,
     });
 
@@ -210,23 +138,23 @@ describe('ConnectionBuilder', () => {
   });
 
   test('Can override createConnection and createEdge when building Connection', () => {
-    const builder = new TestConnectionBuilder({
+    const builder = new FooConnectionBuilder({
       first: 5,
     });
     const connection = builder.build({
       totalEdges: 12,
       nodes: [
-        { id: 'node1', name: 'A' },
-        { id: 'node2', name: 'B' },
-        { id: 'node3', name: 'C' },
-        { id: 'node4', name: 'D' },
-        { id: 'node5', name: 'E' },
+        new Foo({ id: 'node1', name: 'A' }),
+        new Foo({ id: 'node2', name: 'B' }),
+        new Foo({ id: 'node3', name: 'C' }),
+        new Foo({ id: 'node4', name: 'D' }),
+        new Foo({ id: 'node5', name: 'E' }),
       ],
       createConnection({ edges, pageInfo }) {
-        return new TestConnection({ edges, pageInfo, customConnectionField: 99 });
+        return new FooConnection({ edges, pageInfo, customConnectionField: 99 });
       },
       createEdge({ node, cursor }) {
-        return new TestEdge({ node, cursor, customEdgeField: 99 });
+        return new FooEdge({ node, cursor, customEdgeField: 99 });
       },
     });
 
@@ -250,20 +178,20 @@ describe('ConnectionBuilder', () => {
   });
 
   test('Can override createCursor using connectionArgs when building Connection', () => {
-    const builder = new TestConnectionBuilder({
+    const builder = new FooConnectionBuilder({
       first: 5,
       sortOption: 'name',
     });
     const connection = builder.build({
       totalEdges: 12,
       nodes: [
-        { id: 'node1', name: 'A' },
-        { id: 'node2', name: 'B' },
-        { id: 'node3', name: 'C' },
-        { id: 'node4', name: 'D' },
-        { id: 'node5', name: 'E' },
+        new Foo({ id: 'node1', name: 'A' }),
+        new Foo({ id: 'node2', name: 'B' }),
+        new Foo({ id: 'node3', name: 'C' }),
+        new Foo({ id: 'node4', name: 'D' }),
+        new Foo({ id: 'node5', name: 'E' }),
       ],
-      createCursor(this: TestConnectionBuilder, node) {
+      createCursor(this: FooConnectionBuilder, node) {
         if (this.connectionArgs.sortOption === 'name') {
           return new Cursor({ name: node.name });
         }
@@ -291,17 +219,17 @@ describe('ConnectionBuilder', () => {
   });
 
   test('Can build Connection using partial Edges', () => {
-    const builder = new TestConnectionBuilder({
+    const builder = new FooConnectionBuilder({
       first: 5,
     });
     const connection = builder.build({
       totalEdges: 12,
       edges: [
-        { node: { id: 'node1', name: 'A' }, customEdgeField: 1 },
-        { node: { id: 'node2', name: 'B' }, customEdgeField: 2 },
-        { node: { id: 'node3', name: 'C' }, customEdgeField: 3 },
-        { node: { id: 'node4', name: 'D' }, customEdgeField: 4 },
-        { node: { id: 'node5', name: 'E' }, customEdgeField: 5 },
+        { node: new Foo({ id: 'node1', name: 'A' }), customEdgeField: 1 },
+        { node: new Foo({ id: 'node2', name: 'B' }), customEdgeField: 2 },
+        { node: new Foo({ id: 'node3', name: 'C' }), customEdgeField: 3 },
+        { node: new Foo({ id: 'node4', name: 'D' }), customEdgeField: 4 },
+        { node: new Foo({ id: 'node5', name: 'E' }), customEdgeField: 5 },
       ],
     });
 
@@ -319,6 +247,39 @@ describe('ConnectionBuilder', () => {
         { node: { id: 'node3', name: 'C' }, cursor: new Cursor({ id: 'node3' }).encode(), customEdgeField: 3 },
         { node: { id: 'node4', name: 'D' }, cursor: new Cursor({ id: 'node4' }).encode(), customEdgeField: 4 },
         { node: { id: 'node5', name: 'E' }, cursor: new Cursor({ id: 'node5' }).encode(), customEdgeField: 5 },
+      ],
+    });
+  });
+
+  test('Can build Connection with Nodes having a union type', () => {
+    const builder = new BarConnectionBuilder({
+      first: 5,
+    });
+    const connection = builder.build({
+      totalEdges: 12,
+      nodes: [
+        new FruitBar({ id: 'node1', name: 'Apple', sugars: 123 }),
+        new FruitBar({ id: 'node2', name: 'Banana', sugars: 87 }),
+        new NutBar({ id: 'node3', name: 'Peanut', protein: 12 }),
+        new NutBar({ id: 'node4', name: 'Macadamia', protein: 23 }),
+        new FruitBar({ id: 'node5', name: 'Orange', sugars: 234 }),
+      ],
+    });
+
+    expect(connection).toMatchObject({
+      pageInfo: {
+        totalEdges: 12,
+        hasNextPage: true,
+        hasPreviousPage: false,
+        startCursor: new Cursor({ id: 'node1' }).encode(),
+        endCursor: new Cursor({ id: 'node5' }).encode(),
+      },
+      edges: [
+        { node: { id: 'node1', name: 'Apple', sugars: 123 }, cursor: new Cursor({ id: 'node1' }).encode() },
+        { node: { id: 'node2', name: 'Banana', sugars: 87 }, cursor: new Cursor({ id: 'node2' }).encode() },
+        { node: { id: 'node3', name: 'Peanut', protein: 12 }, cursor: new Cursor({ id: 'node3' }).encode() },
+        { node: { id: 'node4', name: 'Macadamia', protein: 23 }, cursor: new Cursor({ id: 'node4' }).encode() },
+        { node: { id: 'node5', name: 'Orange', sugars: 234 }, cursor: new Cursor({ id: 'node5' }).encode() },
       ],
     });
   });

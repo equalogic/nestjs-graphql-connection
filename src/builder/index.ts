@@ -3,3 +3,4 @@
  */
 
 export * from './ConnectionBuilder';
+export * from './OffsetPaginatedConnectionBuilder';

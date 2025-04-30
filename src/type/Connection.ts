@@ -1,4 +1,4 @@
-import * as GQL from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { Initializable } from 'ts-class-initializable';
 import { EdgeInterface } from './Edge';
 import { PageInfo } from './PageInfo';
@@ -17,15 +17,15 @@ export function createConnectionType<
   // This class should be further extended by concrete Connection types. It can't be marked as
   // an abstract class because TS lacks support for returning `abstract new()...` as a type
   // (https://github.com/Microsoft/TypeScript/issues/25606)
-  @GQL.ObjectType({ isAbstract: true })
+  @ObjectType({ isAbstract: true })
   class Connection
     extends Initializable<ConnectionInterface<TEdge> & TInitFields>
     implements ConnectionInterface<TEdge>
   {
-    @GQL.Field(_type => PageInfo)
+    @Field(_type => PageInfo)
     public pageInfo: PageInfo;
 
-    @GQL.Field(_type => [TEdgeClass])
+    @Field(_type => [TEdgeClass])
     public edges: TEdge[];
   }
 
