@@ -1,5 +1,6 @@
 import { Cursor } from '../cursor/Cursor';
 import { Foo, FooConnection, FooConnectionBuilder, FooEdge } from '../../test/FooConnection';
+import { BarConnectionBuilder, FruitBar, NutBar } from '../../test/BarConnection';
 
 describe('ConnectionBuilder', () => {
   test('First page is built correctly', () => {
@@ -246,6 +247,39 @@ describe('ConnectionBuilder', () => {
         { node: { id: 'node3', name: 'C' }, cursor: new Cursor({ id: 'node3' }).encode(), customEdgeField: 3 },
         { node: { id: 'node4', name: 'D' }, cursor: new Cursor({ id: 'node4' }).encode(), customEdgeField: 4 },
         { node: { id: 'node5', name: 'E' }, cursor: new Cursor({ id: 'node5' }).encode(), customEdgeField: 5 },
+      ],
+    });
+  });
+
+  test('Can build Connection with Nodes having a union type', () => {
+    const builder = new BarConnectionBuilder({
+      first: 5,
+    });
+    const connection = builder.build({
+      totalEdges: 12,
+      nodes: [
+        new FruitBar({ id: 'node1', name: 'Apple', sugars: 123 }),
+        new FruitBar({ id: 'node2', name: 'Banana', sugars: 87 }),
+        new NutBar({ id: 'node3', name: 'Peanut', protein: 12 }),
+        new NutBar({ id: 'node4', name: 'Macadamia', protein: 23 }),
+        new FruitBar({ id: 'node5', name: 'Orange', sugars: 234 }),
+      ],
+    });
+
+    expect(connection).toMatchObject({
+      pageInfo: {
+        totalEdges: 12,
+        hasNextPage: true,
+        hasPreviousPage: false,
+        startCursor: new Cursor({ id: 'node1' }).encode(),
+        endCursor: new Cursor({ id: 'node5' }).encode(),
+      },
+      edges: [
+        { node: { id: 'node1', name: 'Apple', sugars: 123 }, cursor: new Cursor({ id: 'node1' }).encode() },
+        { node: { id: 'node2', name: 'Banana', sugars: 87 }, cursor: new Cursor({ id: 'node2' }).encode() },
+        { node: { id: 'node3', name: 'Peanut', protein: 12 }, cursor: new Cursor({ id: 'node3' }).encode() },
+        { node: { id: 'node4', name: 'Macadamia', protein: 23 }, cursor: new Cursor({ id: 'node4' }).encode() },
+        { node: { id: 'node5', name: 'Orange', sugars: 234 }, cursor: new Cursor({ id: 'node5' }).encode() },
       ],
     });
   });
