@@ -114,7 +114,7 @@ export class PersonConnectionBuilder extends ConnectionBuilder<
     // A cursor sent to or received from a client is represented as a base64-encoded, URL-style query string containing
     // one or more key/value pairs describing the referenced node's position in the result set (its ID, a date, etc.)
     // Validation is optional, but recommended to enforce that cursor values supplied by clients must be well-formed.
-    // See documentation for Joi at https://joi.dev/api/?v=17#object
+    // This example uses Joi for validation, see documentation at https://joi.dev/api/?v=17#object
     // The following schema accepts only an object matching the type { id: string }:
     const schema: Joi.ObjectSchema<PersonCursorParams> = Joi.object({
       id: Joi.string().empty('').required(),
