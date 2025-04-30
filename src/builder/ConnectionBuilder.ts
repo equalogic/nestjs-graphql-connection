@@ -8,6 +8,18 @@ export interface ConnectionBuilderOptions {
   allowReverseOrder?: boolean;
 }
 
+export type EdgeExtraFields<TEdge extends EdgeInterface<TNode>, TNode = any> = Partial<Omit<TEdge, 'node' | 'cursor'>>;
+
+export type EdgeInput<TEdge extends EdgeInterface<TNode>, TNode = any> = {
+  node: TNode;
+  cursor?: string;
+} & EdgeExtraFields<TEdge>;
+
+export type EdgeInputWithCursor<TEdge extends EdgeInterface<TNode>, TNode = any> = {
+  node: TNode;
+  cursor: string;
+} & EdgeExtraFields<TEdge>;
+
 interface CommonBuildParams<
   TNode,
   TEdge extends EdgeInterface<TNode>,
@@ -18,7 +30,7 @@ interface CommonBuildParams<
   hasNextPage?: boolean;
   hasPreviousPage?: boolean;
   createConnection?: (fields: { edges: TEdge[]; pageInfo: PageInfo }) => TConnection;
-  createEdge?: (fields: { node: TNode; cursor: string } & Partial<Omit<TEdge, 'node' | 'cursor'>>) => TEdge;
+  createEdge?: (fields: EdgeInputWithCursor<TEdge>) => TEdge;
   createCursor?: (node: TNode, index: number) => TCursor;
 }
 
@@ -39,7 +51,7 @@ type BuildFromEdgesParams<
   TCursor extends Cursor = Cursor,
 > = {
   nodes?: never;
-  edges?: ({ node: TNode } & Partial<Omit<TEdge, 'node'>>)[];
+  edges?: EdgeInput<TEdge>[];
 } & CommonBuildParams<TNode, TEdge, TConnection, TCursor>;
 
 export abstract class ConnectionBuilder<
@@ -62,7 +74,7 @@ export abstract class ConnectionBuilder<
 
   public abstract createConnection(fields: { edges: TEdge[]; pageInfo: PageInfo }): TConnection;
 
-  public abstract createEdge(fields: { node: TNode; cursor: string } & Partial<Omit<TEdge, 'node' | 'cursor'>>): TEdge;
+  public abstract createEdge(fields: EdgeInputWithCursor<TEdge>): TEdge;
 
   public abstract createCursor(node: TNode, index: number): TCursor;
 

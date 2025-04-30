@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { Cursor } from '../cursor/Cursor';
 import { validateParamsUsingSchema } from '../cursor/validateParamsUsingSchema';
 import { ConnectionArgs, createConnectionType, createEdgeType, PageInfo } from '../type';
-import { ConnectionBuilder } from './ConnectionBuilder';
+import { ConnectionBuilder, EdgeInputWithCursor } from './ConnectionBuilder';
 
 class TestNode {
   id: string;
@@ -36,7 +36,7 @@ class TestConnectionBuilder extends ConnectionBuilder<
     return new TestConnection(fields);
   }
 
-  public createEdge(fields: { node: TestNode; cursor: string }): TestEdge {
+  public createEdge(fields: EdgeInputWithCursor<TestEdge>): TestEdge {
     return new TestEdge(fields);
   }
 
