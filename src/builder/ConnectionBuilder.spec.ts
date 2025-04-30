@@ -271,4 +271,37 @@ describe('ConnectionBuilder', () => {
       ],
     });
   });
+
+  test('Can build Connection using partial Edges', () => {
+    const builder = new TestConnectionBuilder({
+      first: 5,
+    });
+    const connection = builder.build({
+      totalEdges: 12,
+      edges: [
+        { node: { id: 'node1', name: 'A' }, customEdgeField: 1 },
+        { node: { id: 'node2', name: 'B' }, customEdgeField: 2 },
+        { node: { id: 'node3', name: 'C' }, customEdgeField: 3 },
+        { node: { id: 'node4', name: 'D' }, customEdgeField: 4 },
+        { node: { id: 'node5', name: 'E' }, customEdgeField: 5 },
+      ],
+    });
+
+    expect(connection).toMatchObject({
+      pageInfo: {
+        totalEdges: 12,
+        hasNextPage: true,
+        hasPreviousPage: false,
+        startCursor: new Cursor({ id: 'node1' }).encode(),
+        endCursor: new Cursor({ id: 'node5' }).encode(),
+      },
+      edges: [
+        { node: { id: 'node1', name: 'A' }, cursor: new Cursor({ id: 'node1' }).encode(), customEdgeField: 1 },
+        { node: { id: 'node2', name: 'B' }, cursor: new Cursor({ id: 'node2' }).encode(), customEdgeField: 2 },
+        { node: { id: 'node3', name: 'C' }, cursor: new Cursor({ id: 'node3' }).encode(), customEdgeField: 3 },
+        { node: { id: 'node4', name: 'D' }, cursor: new Cursor({ id: 'node4' }).encode(), customEdgeField: 4 },
+        { node: { id: 'node5', name: 'E' }, cursor: new Cursor({ id: 'node5' }).encode(), customEdgeField: 5 },
+      ],
+    });
+  });
 });
