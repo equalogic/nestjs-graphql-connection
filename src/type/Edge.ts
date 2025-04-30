@@ -1,4 +1,4 @@
-import * as GQL from '@nestjs/graphql';
+import { Field, GqlTypeReference, ObjectType } from '@nestjs/graphql';
 import { Initializable } from 'ts-class-initializable';
 
 export interface EdgeInterface<TNode> {
@@ -7,19 +7,22 @@ export interface EdgeInterface<TNode> {
 }
 
 export function createEdgeType<TInitFields extends Record<string, any> = Record<string, any>, TNode = any>(
-  TNodeClass: new () => TNode,
+  nodeType: GqlTypeReference,
+  nodeTypeName?: string,
 ): new (fields: EdgeInterface<TNode> & TInitFields) => EdgeInterface<TNode> {
+  nodeTypeName = nodeTypeName ?? (typeof nodeType === 'function' && nodeType.name ? nodeType.name : undefined);
+
   // This class should be further extended by concrete Edge types. It can't be marked as
   // an abstract class because TS lacks support for returning `abstract new()...` as a type
   // (https://github.com/Microsoft/TypeScript/issues/25606)
-  @GQL.ObjectType({ isAbstract: true })
+  @ObjectType({ isAbstract: true })
   class Edge extends Initializable<EdgeInterface<TNode> & TInitFields> implements EdgeInterface<TNode> {
-    @GQL.Field(_type => TNodeClass, {
-      description: `The node object (belonging to type ${TNodeClass.name}) attached to the edge.`,
+    @Field(_type => nodeType, {
+      description: `The node object ${nodeTypeName ? `(belonging to type ${nodeTypeName}) ` : ''}attached to the edge.`,
     })
     public node: TNode;
 
-    @GQL.Field(_type => String, {
+    @Field(_type => String, {
       description: 'An opaque cursor that can be used to retrieve further pages of edges before or after this one.',
     })
     public cursor: string;
