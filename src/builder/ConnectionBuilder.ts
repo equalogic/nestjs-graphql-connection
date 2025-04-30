@@ -20,7 +20,7 @@ export type EdgeInputWithCursor<TEdge extends EdgeInterface<TNode>, TNode = any>
   cursor: string;
 } & EdgeExtraFields<TEdge>;
 
-interface CommonBuildParams<
+export interface CommonBuildParams<
   TNode,
   TEdge extends EdgeInterface<TNode>,
   TConnection extends ConnectionInterface<TEdge>,
@@ -34,7 +34,7 @@ interface CommonBuildParams<
   createCursor?: (node: TNode, index: number) => TCursor;
 }
 
-type BuildFromNodesParams<
+export type BuildFromNodesParams<
   TNode,
   TEdge extends EdgeInterface<TNode>,
   TConnection extends ConnectionInterface<TEdge>,
@@ -44,7 +44,7 @@ type BuildFromNodesParams<
   edges?: never;
 } & CommonBuildParams<TNode, TEdge, TConnection, TCursor>;
 
-type BuildFromEdgesParams<
+export type BuildFromEdgesParams<
   TNode,
   TEdge extends EdgeInterface<TNode>,
   TConnection extends ConnectionInterface<TEdge>,

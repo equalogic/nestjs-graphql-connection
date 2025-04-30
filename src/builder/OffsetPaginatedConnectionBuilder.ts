@@ -1,7 +1,12 @@
 import { OffsetCursor } from '../cursor';
 import { ConnectionArgsValidationError } from '../error';
-import { ConnectionArgs, ConnectionInterface, EdgeInterface, PageInfo } from '../type';
-import { ConnectionBuilder, ConnectionBuilderOptions } from './ConnectionBuilder';
+import { ConnectionArgs, ConnectionInterface, EdgeInterface } from '../type';
+import {
+  BuildFromEdgesParams,
+  BuildFromNodesParams,
+  ConnectionBuilder,
+  ConnectionBuilderOptions,
+} from './ConnectionBuilder';
 
 export abstract class OffsetPaginatedConnectionBuilder<
   TConnection extends ConnectionInterface<TEdge>,
@@ -21,34 +26,37 @@ export abstract class OffsetPaginatedConnectionBuilder<
 
   public build({
     nodes,
+    edges,
     totalEdges,
     hasNextPage,
     hasPreviousPage,
     createConnection = this.createConnection.bind(this),
     createEdge = this.createEdge.bind(this),
     createCursor = this.createCursor.bind(this),
-  }: {
-    nodes: TNode[];
-    totalEdges?: number;
-    hasNextPage?: boolean;
-    hasPreviousPage?: boolean;
-    createConnection?: (fields: { edges: TEdge[]; pageInfo: PageInfo }) => TConnection;
-    createEdge?: (fields: { node: TNode; cursor: string }) => TEdge;
-    createCursor?: (node: TNode, index: number) => OffsetCursor;
-  }): TConnection {
-    const edges = nodes.map((node, index) =>
-      createEdge({
-        node,
-        cursor: createCursor(node, index).encode(),
-      }),
-    );
+  }:
+    | BuildFromNodesParams<TNode, TEdge, TConnection, OffsetCursor>
+    | BuildFromEdgesParams<TNode, TEdge, TConnection, OffsetCursor>): TConnection {
+    const resolvedEdges: TEdge[] =
+      edges != null
+        ? edges.map((edge, index) =>
+            createEdge.bind(this)({
+              cursor: edge.cursor ?? createCursor.bind(this)(edge.node, index).encode(),
+              ...edge,
+            }),
+          )
+        : nodes!.map((node, index) =>
+            createEdge.bind(this)({
+              node,
+              cursor: createCursor.bind(this)(node, index).encode(),
+            }),
+          );
 
-    return createConnection({
-      edges,
+    return createConnection.bind(this)({
+      edges: resolvedEdges,
       pageInfo: this.createPageInfo({
-        edges,
+        edges: resolvedEdges,
         totalEdges,
-        hasNextPage: hasNextPage ?? (totalEdges != null && totalEdges > this.startOffset + edges.length),
+        hasNextPage: hasNextPage ?? (totalEdges != null && totalEdges > this.startOffset + resolvedEdges.length),
         hasPreviousPage: hasPreviousPage ?? this.startOffset > 0,
       }),
     });
