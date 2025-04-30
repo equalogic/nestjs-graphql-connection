@@ -263,8 +263,8 @@ export class PersonFriendEdge extends createEdgeType<{ createdAt: Date }>(Person
 }
 ```
 
-`ConnectionBuilder` supports overriding the `createConnection()` and `createEdge()` methods when calling `build()`. This
-enables you to enrich the connection and edges with additional metadata at resolve time.
+To achieve this, you can pass an array of partial `edges` (instead of `nodes`) to `build()`. This enables you to
+provide values for any additional fields present on the edges.
 
 The following example assumes you have a GraphQL schema that defines a `friends` field on your `Person` object, which
 resolves to a `PersonFriendConnection` containing the person's friends. In your database you would have a `friend` table
@@ -295,19 +295,34 @@ export class PersonResolver {
     // Return resolved PersonFriendConnection with edges and pageInfo
     return connectionBuilder.build({
       totalEdges,
-      nodes: friends.map(friend => friend.otherPerson),
-      createEdge: ({ node, cursor }) => {
-        const friend = friends.find(friend => friend.otherPerson.id === node.id);
-
-        return new PersonFriendEdge({ node, cursor, createdAt: friend.createdAt });
-      },
+      edges: friends.map(friend => ({
+        node: friend.otherPerson,
+        createdAt: friend.createdAt,
+      })),
     });
   }
 }
 ```
 
-Alternatively, you could build the connection result yourself by replacing the `connectionBuilder.build(...)` statement
-with something like the following:
+Alternatively, you can override the `createEdge()` or `createConnection()` methods when calling `build()`.
+
+```ts
+return connectionBuilder.build({
+  totalEdges,
+  nodes: friends.map(friend => friend.otherPerson),
+  createConnection({ edges, pageInfo }) {
+    return new PersonFriendConnection({ edges, pageInfo, customField: 'hello-world' });
+  },
+  createEdge: ({ node, cursor }) => {
+    const friend = friends.find(friend => friend.otherPerson.id === node.id);
+
+    return new PersonFriendEdge({ node, cursor, createdAt: friend.createdAt });
+  },
+});
+```
+
+Finally, if the above methods don't meet your needs you can always build the connection result yourself by replacing
+`connectionBuilder.build(...)` with something like the following:
 
 ```ts
 // Resolve edges with cursor, node, and additional metadata
