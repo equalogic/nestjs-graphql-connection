@@ -1,7 +1,14 @@
 import Joi from 'joi';
 import { Cursor } from '../cursor/Cursor';
 import { validateParamsUsingSchema } from '../cursor/validateParamsUsingSchema';
-import { ConnectionArgs, createConnectionType, createEdgeType, PageInfo } from '../type';
+import {
+  ConnectionArgs,
+  ConnectionInterface,
+  createConnectionType,
+  createEdgeType,
+  EdgeInterface,
+  PageInfo,
+} from '../type';
 import { ConnectionBuilder, EdgeInputWithCursor } from './ConnectionBuilder';
 
 class TestNode {
@@ -9,11 +16,22 @@ class TestNode {
   name: string;
 }
 
-class TestEdge extends createEdgeType<{ customEdgeField?: number }>(TestNode) {
+interface TestEdgeInterface extends EdgeInterface<TestNode> {
+  customEdgeField?: number;
+}
+
+class TestEdge extends createEdgeType<TestEdgeInterface>(TestNode) implements TestEdgeInterface {
   public customEdgeField?: number;
 }
 
-class TestConnection extends createConnectionType<{ customConnectionField?: number }>(TestEdge) {
+interface TestConnectionInterface extends ConnectionInterface<TestEdge> {
+  customConnectionField?: number;
+}
+
+class TestConnection
+  extends createConnectionType<TestConnectionInterface>(TestEdge)
+  implements TestConnectionInterface
+{
   public customConnectionField?: number;
 }
 

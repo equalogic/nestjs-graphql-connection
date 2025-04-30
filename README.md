@@ -247,17 +247,25 @@ properties -- such as the date that the friend was added, or the type of relatio
 this is analogous to having a Many-to-Many relation where the intermediate join table contains additional data columns
 beyond just the keys of the two joined tables.)
 
-In this case your edge type would look like the following example. Notice that we pass a `{ createdAt: Date }` type
-argument to `createEdgeType`; this specifies typings for the fields that are allowed to be passed to your edge class's
-constructor for initialization when doing `new PersonFriendEdge({ ...fields })`.
+In this case your edge type would look like the following example. Notice that we also now define a
+`PersonFriendEdgeInterface` type which we pass as a generic argument to `createEdgeType`; this ensures correct typings
+for the fields that are allowed to be passed to your edge class's constructor for initialization when doing
+`new PersonFriendEdge({ ...fields })`.
 
 ```ts
 import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
-import { createEdgeType } from 'nestjs-graphql-connection';
+import { createEdgeType, EdgeInterface } from 'nestjs-graphql-connection';
 import { Person } from './entities';
 
+export interface PersonFriendEdgeInterface extends EdgeInterface<Person> {
+  createdAt: Date;
+}
+
 @ObjectType()
-export class PersonFriendEdge extends createEdgeType<{ createdAt: Date }>(Person) {
+export class PersonFriendEdge
+  extends createEdgeType<PersonFriendEdgeInterface>(Person)
+  implements PersonFriendEdgeInterface
+{
   @Field(type => GraphQLISODateTime)
   public createdAt: Date;
 }
