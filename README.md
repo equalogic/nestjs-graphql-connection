@@ -80,7 +80,13 @@ Now define a `ConnectionBuilder` class for your `Connection` object. The builder
 pagination arguments for the connection, and creating the cursors and `Edge` objects that make up the connection.
 
 ```ts
-import { ConnectionBuilder, Cursor, PageInfo, validateParamsUsingSchema } from 'nestjs-graphql-connection';
+import {
+  ConnectionBuilder,
+  Cursor,
+  EdgeInputWithCursor,
+  PageInfo,
+  validateParamsUsingSchema,
+} from 'nestjs-graphql-connection';
 
 export type PersonCursorParams = { id: string };
 export type PersonCursor = Cursor<PersonCursorParams>;
@@ -96,7 +102,7 @@ export class PersonConnectionBuilder extends ConnectionBuilder<
     return new PersonConnection(fields);
   }
 
-  public createEdge(fields: { node: TestNode; cursor: string }): TestEdge {
+  public createEdge(fields: EdgeInputWithCursor<PersonEdge>): PersonEdge {
     return new PersonEdge(fields);
   }
 
@@ -168,7 +174,12 @@ determining what the last result was on page 9.
 To use offset cursors, extend your builder class from `OffsetPaginatedConnectionBuilder` instead of `ConnectionBuilder`:
 
 ```ts
-import { OffsetPaginatedConnectionBuilder, PageInfo, validateParamsUsingSchema } from 'nestjs-graphql-connection';
+import {
+  EdgeInputWithCursor,
+  OffsetPaginatedConnectionBuilder,
+  PageInfo,
+  validateParamsUsingSchema,
+} from 'nestjs-graphql-connection';
 
 export class PersonConnectionBuilder extends OffsetPaginatedConnectionBuilder<
   PersonConnection,
@@ -180,7 +191,7 @@ export class PersonConnectionBuilder extends OffsetPaginatedConnectionBuilder<
     return new PersonConnection(fields);
   }
 
-  public createEdge(fields: { node: TestNode; cursor: string }): TestEdge {
+  public createEdge(fields: EdgeInputWithCursor<PersonEdge>): PersonEdge {
     return new PersonEdge(fields);
   }
 
