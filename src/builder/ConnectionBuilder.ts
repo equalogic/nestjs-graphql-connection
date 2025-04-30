@@ -8,6 +8,52 @@ export interface ConnectionBuilderOptions {
   allowReverseOrder?: boolean;
 }
 
+export type EdgeExtraFields<TEdge extends EdgeInterface<TNode>, TNode = any> = Partial<Omit<TEdge, 'node' | 'cursor'>>;
+
+export type EdgeInput<TEdge extends EdgeInterface<TNode>, TNode = any> = {
+  node: TNode;
+  cursor?: string;
+} & EdgeExtraFields<TEdge>;
+
+export type EdgeInputWithCursor<TEdge extends EdgeInterface<TNode>, TNode = any> = {
+  node: TNode;
+  cursor: string;
+} & EdgeExtraFields<TEdge>;
+
+interface CommonBuildParams<
+  TNode,
+  TEdge extends EdgeInterface<TNode>,
+  TConnection extends ConnectionInterface<TEdge>,
+  TCursor extends Cursor = Cursor,
+> {
+  totalEdges?: number;
+  hasNextPage?: boolean;
+  hasPreviousPage?: boolean;
+  createConnection?: (fields: { edges: TEdge[]; pageInfo: PageInfo }) => TConnection;
+  createEdge?: (fields: EdgeInputWithCursor<TEdge>) => TEdge;
+  createCursor?: (node: TNode, index: number) => TCursor;
+}
+
+type BuildFromNodesParams<
+  TNode,
+  TEdge extends EdgeInterface<TNode>,
+  TConnection extends ConnectionInterface<TEdge>,
+  TCursor extends Cursor = Cursor,
+> = {
+  nodes?: TNode[];
+  edges?: never;
+} & CommonBuildParams<TNode, TEdge, TConnection, TCursor>;
+
+type BuildFromEdgesParams<
+  TNode,
+  TEdge extends EdgeInterface<TNode>,
+  TConnection extends ConnectionInterface<TEdge>,
+  TCursor extends Cursor = Cursor,
+> = {
+  nodes?: never;
+  edges?: EdgeInput<TEdge>[];
+} & CommonBuildParams<TNode, TEdge, TConnection, TCursor>;
+
 export abstract class ConnectionBuilder<
   TConnection extends ConnectionInterface<TEdge>,
   TConnectionArgs extends ConnectionArgs,
@@ -28,7 +74,7 @@ export abstract class ConnectionBuilder<
 
   public abstract createConnection(fields: { edges: TEdge[]; pageInfo: PageInfo }): TConnection;
 
-  public abstract createEdge(fields: { node: TNode; cursor: string }): TEdge;
+  public abstract createEdge(fields: EdgeInputWithCursor<TEdge>): TEdge;
 
   public abstract createCursor(node: TNode, index: number): TCursor;
 
@@ -58,34 +104,37 @@ export abstract class ConnectionBuilder<
 
   public build({
     nodes,
+    edges,
     totalEdges,
     hasNextPage,
     hasPreviousPage,
     createConnection = this.createConnection,
     createEdge = this.createEdge,
     createCursor = this.createCursor,
-  }: {
-    nodes: TNode[];
-    totalEdges?: number;
-    hasNextPage?: boolean;
-    hasPreviousPage?: boolean;
-    createConnection?: (fields: { edges: TEdge[]; pageInfo: PageInfo }) => TConnection;
-    createEdge?: (fields: { node: TNode; cursor: string }) => TEdge;
-    createCursor?: (node: TNode, index: number) => TCursor;
-  }): TConnection {
-    const edges = nodes.map((node, index) =>
-      createEdge.bind(this)({
-        node,
-        cursor: createCursor.bind(this)(node, index).encode(),
-      }),
-    );
+  }:
+    | BuildFromNodesParams<TNode, TEdge, TConnection, TCursor>
+    | BuildFromEdgesParams<TNode, TEdge, TConnection, TCursor>): TConnection {
+    const resolvedEdges: TEdge[] =
+      edges != null
+        ? edges.map((edge, index) =>
+            createEdge.bind(this)({
+              cursor: edge.cursor ?? createCursor.bind(this)(edge.node, index).encode(),
+              ...edge,
+            }),
+          )
+        : nodes!.map((node, index) =>
+            createEdge.bind(this)({
+              node,
+              cursor: createCursor.bind(this)(node, index).encode(),
+            }),
+          );
 
     return createConnection.bind(this)({
-      edges,
+      edges: resolvedEdges,
       pageInfo: this.createPageInfo({
-        edges,
+        edges: resolvedEdges,
         totalEdges,
-        hasNextPage: hasNextPage ?? (totalEdges != null && totalEdges > edges.length),
+        hasNextPage: hasNextPage ?? (totalEdges != null && totalEdges > resolvedEdges.length),
         hasPreviousPage: hasPreviousPage ?? (this.afterCursor != null || this.beforeCursor != null),
       }),
     });

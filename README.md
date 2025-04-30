@@ -80,7 +80,13 @@ Now define a `ConnectionBuilder` class for your `Connection` object. The builder
 pagination arguments for the connection, and creating the cursors and `Edge` objects that make up the connection.
 
 ```ts
-import { ConnectionBuilder, Cursor, PageInfo, validateParamsUsingSchema } from 'nestjs-graphql-connection';
+import {
+  ConnectionBuilder,
+  Cursor,
+  EdgeInputWithCursor,
+  PageInfo,
+  validateParamsUsingSchema,
+} from 'nestjs-graphql-connection';
 
 export type PersonCursorParams = { id: string };
 export type PersonCursor = Cursor<PersonCursorParams>;
@@ -96,7 +102,7 @@ export class PersonConnectionBuilder extends ConnectionBuilder<
     return new PersonConnection(fields);
   }
 
-  public createEdge(fields: { node: TestNode; cursor: string }): TestEdge {
+  public createEdge(fields: EdgeInputWithCursor<PersonEdge>): PersonEdge {
     return new PersonEdge(fields);
   }
 
@@ -108,7 +114,7 @@ export class PersonConnectionBuilder extends ConnectionBuilder<
     // A cursor sent to or received from a client is represented as a base64-encoded, URL-style query string containing
     // one or more key/value pairs describing the referenced node's position in the result set (its ID, a date, etc.)
     // Validation is optional, but recommended to enforce that cursor values supplied by clients must be well-formed.
-    // See documentation for Joi at https://joi.dev/api/?v=17#object
+    // This example uses Joi for validation, see documentation at https://joi.dev/api/?v=17#object
     // The following schema accepts only an object matching the type { id: string }:
     const schema: Joi.ObjectSchema<PersonCursorParams> = Joi.object({
       id: Joi.string().empty('').required(),
@@ -168,7 +174,12 @@ determining what the last result was on page 9.
 To use offset cursors, extend your builder class from `OffsetPaginatedConnectionBuilder` instead of `ConnectionBuilder`:
 
 ```ts
-import { OffsetPaginatedConnectionBuilder, PageInfo, validateParamsUsingSchema } from 'nestjs-graphql-connection';
+import {
+  EdgeInputWithCursor,
+  OffsetPaginatedConnectionBuilder,
+  PageInfo,
+  validateParamsUsingSchema,
+} from 'nestjs-graphql-connection';
 
 export class PersonConnectionBuilder extends OffsetPaginatedConnectionBuilder<
   PersonConnection,
@@ -180,7 +191,7 @@ export class PersonConnectionBuilder extends OffsetPaginatedConnectionBuilder<
     return new PersonConnection(fields);
   }
 
-  public createEdge(fields: { node: TestNode; cursor: string }): TestEdge {
+  public createEdge(fields: EdgeInputWithCursor<PersonEdge>): PersonEdge {
     return new PersonEdge(fields);
   }
 
@@ -236,24 +247,32 @@ properties -- such as the date that the friend was added, or the type of relatio
 this is analogous to having a Many-to-Many relation where the intermediate join table contains additional data columns
 beyond just the keys of the two joined tables.)
 
-In this case your edge type would look like the following example. Notice that we pass a `{ createdAt: Date }` type
-argument to `createEdgeType`; this specifies typings for the fields that are allowed to be passed to your edge class's
-constructor for initialization when doing `new PersonFriendEdge({ ...fields })`.
+In this case your edge type would look like the following example. Notice that we also now define a
+`PersonFriendEdgeInterface` type which we pass as a generic argument to `createEdgeType`; this ensures correct typings
+for the fields that are allowed to be passed to your edge class's constructor for initialization when doing
+`new PersonFriendEdge({ ...fields })`.
 
 ```ts
 import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
-import { createEdgeType } from 'nestjs-graphql-connection';
+import { createEdgeType, EdgeInterface } from 'nestjs-graphql-connection';
 import { Person } from './entities';
 
+export interface PersonFriendEdgeInterface extends EdgeInterface<Person> {
+  createdAt: Date;
+}
+
 @ObjectType()
-export class PersonFriendEdge extends createEdgeType<{ createdAt: Date }>(Person) {
+export class PersonFriendEdge
+  extends createEdgeType<PersonFriendEdgeInterface>(Person)
+  implements PersonFriendEdgeInterface
+{
   @Field(type => GraphQLISODateTime)
   public createdAt: Date;
 }
 ```
 
-`ConnectionBuilder` supports overriding the `createConnection()` and `createEdge()` methods when calling `build()`. This
-enables you to enrich the connection and edges with additional metadata at resolve time.
+To achieve this, you can pass an array of partial `edges` (instead of `nodes`) to `build()`. This enables you to
+provide values for any additional fields present on the edges.
 
 The following example assumes you have a GraphQL schema that defines a `friends` field on your `Person` object, which
 resolves to a `PersonFriendConnection` containing the person's friends. In your database you would have a `friend` table
@@ -284,19 +303,34 @@ export class PersonResolver {
     // Return resolved PersonFriendConnection with edges and pageInfo
     return connectionBuilder.build({
       totalEdges,
-      nodes: friends.map(friend => friend.otherPerson),
-      createEdge: ({ node, cursor }) => {
-        const friend = friends.find(friend => friend.otherPerson.id === node.id);
-
-        return new PersonFriendEdge({ node, cursor, createdAt: friend.createdAt });
-      },
+      edges: friends.map(friend => ({
+        node: friend.otherPerson,
+        createdAt: friend.createdAt,
+      })),
     });
   }
 }
 ```
 
-Alternatively, you could build the connection result yourself by replacing the `connectionBuilder.build(...)` statement
-with something like the following:
+Alternatively, you can override the `createEdge()` or `createConnection()` methods when calling `build()`.
+
+```ts
+return connectionBuilder.build({
+  totalEdges,
+  nodes: friends.map(friend => friend.otherPerson),
+  createConnection({ edges, pageInfo }) {
+    return new PersonFriendConnection({ edges, pageInfo, customField: 'hello-world' });
+  },
+  createEdge: ({ node, cursor }) => {
+    const friend = friends.find(friend => friend.otherPerson.id === node.id);
+
+    return new PersonFriendEdge({ node, cursor, createdAt: friend.createdAt });
+  },
+});
+```
+
+Finally, if the above methods don't meet your needs you can always build the connection result yourself by replacing
+`connectionBuilder.build(...)` with something like the following:
 
 ```ts
 // Resolve edges with cursor, node, and additional metadata
