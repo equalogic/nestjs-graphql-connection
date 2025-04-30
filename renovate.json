@@ -29,6 +29,10 @@
       "matchPackageNames": ["node", "@types/node"],
       "groupName": "Node.js",
       "allowedVersions": "^16"
+    },
+    {
+      "packagePatterns": ["^@nestjs/"],
+      "groupName": "Nest.js"
     }
   ]
 }
