@@ -285,6 +285,54 @@ describe('ConnectionBuilder', () => {
     });
   });
 
+  test('Can fetch zero first edges', () => {
+    const builder = new FooConnectionBuilder({
+      first: 0,
+    });
+
+    expect(builder.edgesPerPage).toBe(0);
+    expect(builder.afterCursor).toBeUndefined();
+    expect(builder.beforeCursor).toBeUndefined();
+
+    const connection = builder.build({
+      totalEdges: 12,
+      nodes: [],
+    });
+
+    expect(connection).toMatchObject({
+      pageInfo: {
+        totalEdges: 12,
+        hasNextPage: true,
+        hasPreviousPage: false,
+      },
+      edges: [],
+    });
+  });
+
+  test('Can fetch zero last edges', () => {
+    const builder = new FooConnectionBuilder({
+      last: 0,
+    });
+
+    expect(builder.edgesPerPage).toBe(0);
+    expect(builder.afterCursor).toBeUndefined();
+    expect(builder.beforeCursor).toBeUndefined();
+
+    const connection = builder.build({
+      totalEdges: 12,
+      nodes: [],
+    });
+
+    expect(connection).toMatchObject({
+      pageInfo: {
+        totalEdges: 12,
+        hasNextPage: true,
+        hasPreviousPage: false,
+      },
+      edges: [],
+    });
+  });
+
   describe('Connection arguments', () => {
     test('Should throw an error if the connection does not support offset pagination', () => {
       const createBuilder = () =>
@@ -337,7 +385,7 @@ describe('ConnectionBuilder', () => {
       const createBuilder = () =>
         new FooConnectionBuilder({
           after: '...',
-          before: '...'
+          before: '...',
         });
 
       expect(createBuilder).toThrow(
