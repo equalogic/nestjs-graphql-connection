@@ -151,9 +151,9 @@ export abstract class ConnectionBuilder<
     }
 
     if (first != null) {
-      if (first > maxEdgesPerPage || first < 1) {
+      if (first > maxEdgesPerPage || first < 0) {
         throw new ConnectionArgsValidationError(
-          `The "first" argument accepts a value between 1 and ${maxEdgesPerPage}, inclusive.`,
+          `The "first" argument accepts a value between 0 and ${maxEdgesPerPage}, inclusive.`,
         );
       }
 
@@ -171,9 +171,9 @@ export abstract class ConnectionBuilder<
         throw new ConnectionArgsValidationError('This connection does not support the "last" argument for pagination.');
       }
 
-      if (last > maxEdgesPerPage || last < 1) {
+      if (last > maxEdgesPerPage || last < 0) {
         throw new ConnectionArgsValidationError(
-          `The "last" argument accepts a value between 1 and ${maxEdgesPerPage}, inclusive.`,
+          `The "last" argument accepts a value between 0 and ${maxEdgesPerPage}, inclusive.`,
         );
       }
 

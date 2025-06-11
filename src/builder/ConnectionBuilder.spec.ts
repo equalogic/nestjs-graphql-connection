@@ -1,6 +1,7 @@
 import { Cursor } from '../cursor/Cursor';
 import { Foo, FooConnection, FooConnectionBuilder, FooEdge } from '../../test/FooConnection';
 import { BarConnectionBuilder, FruitBar, NutBar } from '../../test/BarConnection';
+import { ConnectionArgsValidationError } from '../error';
 
 describe('ConnectionBuilder', () => {
   test('First page is built correctly', () => {
@@ -281,6 +282,117 @@ describe('ConnectionBuilder', () => {
         { node: { id: 'node4', name: 'Macadamia', protein: 23 }, cursor: new Cursor({ id: 'node4' }).encode() },
         { node: { id: 'node5', name: 'Orange', sugars: 234 }, cursor: new Cursor({ id: 'node5' }).encode() },
       ],
+    });
+  });
+
+  test('Can fetch zero first edges', () => {
+    const builder = new FooConnectionBuilder({
+      first: 0,
+    });
+
+    expect(builder.edgesPerPage).toBe(0);
+    expect(builder.afterCursor).toBeUndefined();
+    expect(builder.beforeCursor).toBeUndefined();
+
+    const connection = builder.build({
+      totalEdges: 12,
+      nodes: [],
+    });
+
+    expect(connection).toMatchObject({
+      pageInfo: {
+        totalEdges: 12,
+        hasNextPage: true,
+        hasPreviousPage: false,
+      },
+      edges: [],
+    });
+  });
+
+  test('Can fetch zero last edges', () => {
+    const builder = new FooConnectionBuilder({
+      last: 0,
+    });
+
+    expect(builder.edgesPerPage).toBe(0);
+    expect(builder.afterCursor).toBeUndefined();
+    expect(builder.beforeCursor).toBeUndefined();
+
+    const connection = builder.build({
+      totalEdges: 12,
+      nodes: [],
+    });
+
+    expect(connection).toMatchObject({
+      pageInfo: {
+        totalEdges: 12,
+        hasNextPage: true,
+        hasPreviousPage: false,
+      },
+      edges: [],
+    });
+  });
+
+  describe('Connection arguments', () => {
+    test('Should throw an error if the connection does not support offset pagination', () => {
+      const createBuilder = () =>
+        new FooConnectionBuilder({
+          page: 1,
+        });
+
+      expect(createBuilder).toThrow(
+        new ConnectionArgsValidationError('This connection does not support the "page" argument for pagination.'),
+      );
+    });
+
+    test('Should throw an error if first is less than zero', () => {
+      const createBuilder = () =>
+        new FooConnectionBuilder({
+          first: -1,
+        });
+
+      expect(createBuilder).toThrow(
+        new ConnectionArgsValidationError(`The "first" argument accepts a value between 0 and 100, inclusive.`),
+      );
+    });
+
+    test('Should throw an error if both "first" and "last" arguments are supplied', () => {
+      const createBuilder = () =>
+        new FooConnectionBuilder({
+          first: 5,
+          last: 5,
+        });
+
+      expect(createBuilder).toThrow(
+        new ConnectionArgsValidationError(
+          'It is not permitted to specify both "first" and "last" arguments simultaneously.',
+        ),
+      );
+    });
+
+    test('Should throw an error if last is less than zero', () => {
+      const createBuilder = () =>
+        new FooConnectionBuilder({
+          last: -1,
+        });
+
+      expect(createBuilder).toThrow(
+        new ConnectionArgsValidationError(`The "last" argument accepts a value between 0 and 100, inclusive.`),
+      );
+    });
+
+    test('Should throw an error if both "after" and "before" arguments are supplied', () => {
+      const createBuilder = () =>
+        new FooConnectionBuilder({
+          after: '...',
+          before: '...',
+        });
+
+      expect(createBuilder).toThrow(
+        new ConnectionArgsValidationError(
+          'It is not permitted to specify both "after" and "before" arguments simultaneously.',
+        ),
+      );
     });
   });
 });
