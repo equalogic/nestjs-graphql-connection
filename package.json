@@ -36,7 +36,7 @@
   "dependencies": {
     "class-validator": "^0.14.0",
     "joi": "^17.2.0",
-    "query-string": "^7.1.1",
+    "query-string": "^9.0.0",
     "ts-class-initializable": "1.0.2"
   },
   "devDependencies": {
