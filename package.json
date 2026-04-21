@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@nestjs/common": "11.1.14",
-    "@nestjs/core": "11.1.14",
+    "@nestjs/core": "11.1.18",
     "@nestjs/graphql": "13.2.4",
     "@types/jest": "29.5.14",
     "@types/node": "16.18.126",
