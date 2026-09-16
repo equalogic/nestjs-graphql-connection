@@ -40,9 +40,9 @@
     "ts-class-initializable": "1.0.2"
   },
   "devDependencies": {
-    "@nestjs/common": "11.1.28",
-    "@nestjs/core": "11.1.28",
-    "@nestjs/graphql": "13.4.2",
+    "@nestjs/common": "11.2.3",
+    "@nestjs/core": "11.2.3",
+    "@nestjs/graphql": "13.4.5",
     "@types/jest": "29.5.14",
     "@types/node": "16.18.126",
     "@typescript-eslint/eslint-plugin": "6.21.0",
